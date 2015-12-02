@@ -5,11 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jstorni.lorm.Repository;
 import org.jstorni.lorm.SchemaSupport;
+import org.jstorni.lorm.exceptions.DataException;
 import org.jstorni.lorm.exceptions.DataValidationException;
 import org.jstorni.lorm.mapping.EntityToItemMapper;
 import org.jstorni.lorm.mapping.ItemToEntityMapper;
@@ -33,19 +40,38 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
 	private final EntityToItemMapper<T> entityToItemMapper;
 	private final ItemToEntityMapper<T> itemToEntityMapper;
+	private final int batchCoreThreadCount;
+	private final int batchMaxThreadCount;
 
 	protected final Log log = LogFactory.getLog(getClass());
 
 	protected final static int BATCH_WRITE_ITEMS_LIMIT = 25;
 	protected final static int BATCH_DELETE_ITEMS_LIMIT = 25;
-	
+	protected final static int BATCH_TIMEOUT_MILLIS = 5000;
+
+	private final static int BATCH_EXECUTOR_DEFAULT_CORE_THREADS = 5;
+	private final static int BATCH_EXECUTOR_DEFAULT_MAX_THREADS = 25;
+
 	public DynamoDBBaseRepository(DynamoDB dynamoDB,
 			EntityToItemMapper<T> entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass) {
+		this(dynamoDB, entityToItemMapper, itemToEntityMapper,
+				entitySchemaSupport, entityClass,
+				BATCH_EXECUTOR_DEFAULT_CORE_THREADS,
+				BATCH_EXECUTOR_DEFAULT_MAX_THREADS);
+	}
+
+	public DynamoDBBaseRepository(DynamoDB dynamoDB,
+			EntityToItemMapper<T> entityToItemMapper,
+			ItemToEntityMapper<T> itemToEntityMapper,
+			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass,
+			int batchCoreThreadCount, int batchMaxThreadCount) {
 		super(dynamoDB, entitySchemaSupport, entityClass);
 		this.entityToItemMapper = entityToItemMapper;
 		this.itemToEntityMapper = itemToEntityMapper;
+		this.batchCoreThreadCount = batchCoreThreadCount;
+		this.batchMaxThreadCount = batchMaxThreadCount;
 	}
 
 	/*
@@ -149,8 +175,46 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 		return item;
 	}
 
+	protected ExecutorService buildBatchExecutor(int coreThreads, int maxThreads) {
+		ExecutorService executor;
+
+		if (coreThreads > 1 || maxThreads > 1) {
+			executor = new ThreadPoolExecutor(batchCoreThreadCount,
+					batchMaxThreadCount, 0L, TimeUnit.SECONDS,
+					new SynchronousQueue<Runnable>(),
+					new ThreadPoolExecutor.CallerRunsPolicy());
+		} else {
+			executor = Executors.newSingleThreadExecutor();
+		}
+
+		return executor;
+	}
+
+	protected void waitForBatchExecution(ExecutorService executor,
+			long timeoutMillis) {
+		executor.shutdown();
+
+		try {
+			executor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+			if (!executor.isTerminated()) {
+				throw new DataException(
+						"Timeout when executing batch on table "
+								+ getTable().getTableName() + " (Timeout: "
+								+ timeoutMillis + " millis)");
+			}
+		} catch (InterruptedException e) {
+			throw new DataException("Error while executing batch on table "
+					+ getTable().getTableName() + ". Unexpected interruption");
+		}
+	}
+
 	@Override
 	public List<T> save(List<T> instances) {
+
+		ExecutorService executor = buildBatchExecutor(batchCoreThreadCount,
+				batchMaxThreadCount);
+
+		AtomicInteger taskCount = new AtomicInteger();
 
 		List<Item> items = new ArrayList<Item>();
 		for (T instance : instances) {
@@ -162,15 +226,31 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 			Item item = buildItem(instance);
 			if (newItem) {
 				// batch write is just for existing items
-				doSingleInsert(item);
-				
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						taskCount.getAndIncrement();
+						doSingleInsert(item);
+					}
+				});
+
 			} else {
 				// TODO execute @PrePersist
 				items.add(item);
 				if (items.size() == BATCH_WRITE_ITEMS_LIMIT) {
-					doBatchUpdateOrDelete(new TableWriteItems(getTable()
-							.getTableName()).withItemsToPut(items));
-					
+					List<Item> itemsToProcess = new ArrayList<Item>();
+					itemsToProcess.addAll(items);
+					executor.execute(new Runnable() {
+						@Override
+						public void run() {
+							taskCount.getAndIncrement();
+							doBatchUpdateOrDelete(new TableWriteItems(
+									getTable().getTableName())
+									.withItemsToPut(itemsToProcess));
+						}
+
+					});
+
 					// TODO execute @PostPersist
 
 					items.clear();
@@ -179,10 +259,21 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 		}
 
 		if (!items.isEmpty()) {
-			doBatchUpdateOrDelete(new TableWriteItems(getTable().getTableName())
-					.withItemsToPut(items));
+			executor.execute(new Runnable() {
+				@Override
+				public void run() {
+					taskCount.getAndIncrement();
+					doBatchUpdateOrDelete(new TableWriteItems(getTable()
+							.getTableName()).withItemsToPut(items));
+				}
+
+			});
+
 			// TODO execute @PostPersist
 		}
+
+		waitForBatchExecution(executor, taskCount.intValue()
+				* BATCH_TIMEOUT_MILLIS);
 
 		return instances;
 	}
@@ -190,10 +281,10 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	private void doSingleInsert(Item item) {
 		getTable().putItem(item);
 	}
-	
+
 	private void doBatchUpdateOrDelete(TableWriteItems tableWriteItems) {
-		BatchWriteItemOutcome outcome = getDynamoDB()
-				.batchWriteItem(tableWriteItems);
+		BatchWriteItemOutcome outcome = getDynamoDB().batchWriteItem(
+				tableWriteItems);
 
 		// keep trying until items are fully processed
 		// TODO search for exponential backoff and timeout
@@ -206,7 +297,8 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 				log.warn("Going to retry to update/delete "
 						+ outcome.getUnprocessedItems().size()
 						+ " unprocessed items (try #" + (++tryCount) + ")");
-				outcome = getDynamoDB().batchWriteItemUnprocessed(unprocessedItems);
+				outcome = getDynamoDB().batchWriteItemUnprocessed(
+						unprocessedItems);
 			}
 
 		} while (outcome.getUnprocessedItems().size() > 0);
@@ -225,6 +317,11 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
 	@Override
 	public void deleteById(List<String> ids) {
+		ExecutorService executor = buildBatchExecutor(batchCoreThreadCount,
+				batchMaxThreadCount);
+
+		AtomicInteger taskCount = new AtomicInteger();
+
 		List<String> idsToDelete = new ArrayList<String>();
 
 		String idFieldName = getIdHandler().getIdFieldName();
@@ -233,18 +330,30 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 			idsToDelete.add(id);
 
 			if (idsToDelete.size() == BATCH_DELETE_ITEMS_LIMIT) {
-				doBatchUpdateOrDelete(new TableWriteItems(getTable()
-						.getTableName()).withHashOnlyKeysToDelete(idFieldName,
-						idsToDelete));
+				List<String> batchIds = new ArrayList<String>();
+				batchIds.addAll(idsToDelete);
+				executor.execute(new Runnable() {
+					@Override
+					public void run() {
+						doBatchUpdateOrDelete(new TableWriteItems(getTable()
+								.getTableName())
+						.withHashOnlyKeysToDelete(
+								idFieldName, batchIds.toArray()));
+						taskCount.incrementAndGet();
+					}
+				});
+
 				idsToDelete.clear();
 			}
 		}
 
 		if (!idsToDelete.isEmpty()) {
 			doBatchUpdateOrDelete(new TableWriteItems(getTable().getTableName())
-					.withHashOnlyKeysToDelete(idFieldName, idsToDelete));
+					.withHashOnlyKeysToDelete(idFieldName, idsToDelete.toArray()));
 		}
 
+		waitForBatchExecution(executor, taskCount.intValue()
+				* BATCH_TIMEOUT_MILLIS);
 	}
 
 	protected PrimaryKey buildPrimaryKey(String idValue) {

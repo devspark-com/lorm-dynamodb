@@ -56,23 +56,29 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 		Repository<Merchant> repository = entityManager
 				.getRepository(Merchant.class);
 
+		// remove all
+		List<String> existingMerchantIds = new ArrayList<String>();
+		List<Merchant> existingMerchants = repository.findAll();
+		for (Merchant merchant : existingMerchants) {
+			existingMerchantIds.add(merchant.getId());
+		}
+		repository.deleteById(existingMerchantIds);
+		
+		// add 100
 		List<Merchant> merchants = new ArrayList<Merchant>();
 		for (int i = 0; i < 100; i++) {
 			Merchant merchant = buildMerchant("sample merchant #" + i);
 			merchants.add(merchant);
 		}
-		long start = System.currentTimeMillis();
 
 		repository.save(merchants);
-		
-		System.out.println(merchants.size() + " items stored in: "
-				+ (System.currentTimeMillis() - start) + " millis");
 
+		// fetch recently added
 		List<Merchant> savedMerchants = repository.findAll();
 
 		Assert.assertNotNull(savedMerchants);
-		Assert.assertTrue("Expected at least 100 merchants",
-				savedMerchants.size() >= 100);
+		Assert.assertTrue("Expected 100 merchants",
+				savedMerchants.size() == 100);
 
 		for (Merchant merchant : merchants) {
 			boolean found = false;

@@ -26,7 +26,8 @@ public class BaseIntegrationTest {
 	protected AmazonDynamoDB dynamoDB;
 
 	public void setUp() {
-		entityManager = new DynamoDBEntityManager(HOST, Integer.valueOf(PORT));
+		entityManager = new DynamoDBEntityManager(HOST, Integer.valueOf(PORT),
+				"", "");
 		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials("", ""));
 		dynamoDB.setEndpoint("http://" + HOST + ":" + PORT);
 

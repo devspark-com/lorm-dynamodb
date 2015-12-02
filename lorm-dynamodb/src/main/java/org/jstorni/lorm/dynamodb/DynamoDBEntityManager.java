@@ -18,11 +18,17 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 
 	public final static String HOST = "HOST";
 	public final static String PORT = "PORT";
+	public final static String USERNAME = "USERNAME";
+	public final static String PASSWORD = "PASSWORD";
 
-	public DynamoDBEntityManager(String host, int port) {
+	public DynamoDBEntityManager(String host, int port, String username,
+			String password) {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(HOST, host);
 		properties.put(PORT, String.valueOf(port));
+		properties.put(USERNAME, username);
+		properties.put(PASSWORD, password);
+		
 		setUp(properties);
 	}
 
@@ -32,7 +38,8 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 			return;
 		}
 
-		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials("", ""));
+		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(
+				properties.get(USERNAME), properties.get(PASSWORD)));
 		dynamoDB.setEndpoint("http://" + properties.get(HOST) + ":"
 				+ properties.get(PORT));
 	}
