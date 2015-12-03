@@ -47,7 +47,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
 	protected final static int BATCH_WRITE_ITEMS_LIMIT = 25;
 	protected final static int BATCH_DELETE_ITEMS_LIMIT = 25;
-	protected final static int BATCH_TIMEOUT_MILLIS = 5000;
+	protected final static int BATCH_TIMEOUT_MILLIS = 10000;
 
 	private final static int BATCH_EXECUTOR_DEFAULT_CORE_THREADS = 5;
 	private final static int BATCH_EXECUTOR_DEFAULT_MAX_THREADS = 25;
@@ -82,6 +82,10 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	@Override
 	public T findOne(String id) {
 		Item item = getTable().getItem(buildPrimaryKey(id));
+		
+		if (item == null) {
+			return null;
+		}
 
 		return itemToEntityMapper.map(extractAttrsFromItem(item));
 	}
@@ -272,8 +276,10 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 			// TODO execute @PostPersist
 		}
 
-		waitForBatchExecution(executor, taskCount.intValue()
-				* BATCH_TIMEOUT_MILLIS);
+		if (taskCount.intValue() > 0) {
+			waitForBatchExecution(executor, taskCount.intValue()
+					* BATCH_TIMEOUT_MILLIS);
+		}
 
 		return instances;
 	}
@@ -336,8 +342,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 					@Override
 					public void run() {
 						doBatchUpdateOrDelete(new TableWriteItems(getTable()
-								.getTableName())
-						.withHashOnlyKeysToDelete(
+								.getTableName()).withHashOnlyKeysToDelete(
 								idFieldName, batchIds.toArray()));
 						taskCount.incrementAndGet();
 					}
@@ -349,11 +354,14 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
 		if (!idsToDelete.isEmpty()) {
 			doBatchUpdateOrDelete(new TableWriteItems(getTable().getTableName())
-					.withHashOnlyKeysToDelete(idFieldName, idsToDelete.toArray()));
+					.withHashOnlyKeysToDelete(idFieldName,
+							idsToDelete.toArray()));
 		}
 
-		waitForBatchExecution(executor, taskCount.intValue()
-				* BATCH_TIMEOUT_MILLIS);
+		if (taskCount.intValue() > 0) {
+			waitForBatchExecution(executor, taskCount.intValue()
+					* BATCH_TIMEOUT_MILLIS);
+		}
 	}
 
 	protected PrimaryKey buildPrimaryKey(String idValue) {
