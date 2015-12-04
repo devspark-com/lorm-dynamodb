@@ -25,9 +25,9 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 public class SchemaSupportITTest extends BaseIntegrationTest {
 
 	@Before
-	public void setUp() {
-		super.setUp();
-
+	public void setup() {
+		super.setup();
+		
 		addToEntityManager(Merchant.class);
 		addToEntityManager(Expense.class);
 	}

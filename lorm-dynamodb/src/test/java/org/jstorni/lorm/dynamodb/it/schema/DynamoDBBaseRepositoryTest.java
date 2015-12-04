@@ -13,8 +13,8 @@ import org.junit.Test;
 public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
 	@Before
-	public void setUp() {
-		super.setUp();
+	public void setup() {
+		super.setup();
 
 		addToEntityManager(Merchant.class);
 		addToEntityManager(Expense.class);

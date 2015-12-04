@@ -17,20 +17,44 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 
 public class BaseIntegrationTest {
-	private static final String PORT = System.getProperty("dynamodb.port",
-			"8000");
-	private static final String HOST = System.getProperty("dynamodb.host",
-			"localhost");
+	private static final String PORT = System.getProperty("dynamodb.port");
+	private static final String HOST = System.getProperty("dynamodb.host");
+
+	private static final String ACCESS_KEY = System
+			.getProperty("dynamodb.user.access");
+	private static final String SECRET_KEY = System
+			.getProperty("dynamodb.user.secret");
 
 	protected EntityManager entityManager;
 	protected AmazonDynamoDB dynamoDB;
 
-	public void setUp() {
-		entityManager = new DynamoDBEntityManager(HOST, Integer.valueOf(PORT),
-				"", "");
+	public void setup() {
+		if (System.getProperty("dynamodb.user.access") != null) {
+			setupRemote();
+		} else {
+			setupLocal();
+		}
+	}
+
+	public void setupLocal() {
+		entityManager = new DynamoDBEntityManager(HOST, PORT, "", "");
 		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials("", ""));
 		dynamoDB.setEndpoint("http://" + HOST + ":" + PORT);
+	}
 
+	public void setupRemote() {
+		entityManager = new DynamoDBEntityManager(HOST, PORT, ACCESS_KEY,
+				SECRET_KEY);
+		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(ACCESS_KEY,
+				SECRET_KEY));
+		if (HOST != null) {
+			String url = "http://" + HOST;
+			if (PORT != null) {
+				url = url + ":" + PORT;
+			}
+			dynamoDB.setEndpoint("http://" + HOST + ":"
+					+ PORT);
+		}
 	}
 
 	protected <T> void addToEntityManager(Class<T> entityClass) {

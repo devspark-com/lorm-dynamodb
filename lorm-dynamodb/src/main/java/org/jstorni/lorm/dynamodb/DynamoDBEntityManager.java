@@ -18,16 +18,16 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 
 	public final static String HOST = "HOST";
 	public final static String PORT = "PORT";
-	public final static String USERNAME = "USERNAME";
-	public final static String PASSWORD = "PASSWORD";
+	public final static String ACCESS_KEY = "ACCESS_KEY";
+	public final static String SECRET_KEY = "SECRET_KEY";
 
-	public DynamoDBEntityManager(String host, int port, String username,
+	public DynamoDBEntityManager(String host, String port, String username,
 			String password) {
 		Map<String, String> properties = new HashMap<String, String>();
 		properties.put(HOST, host);
-		properties.put(PORT, String.valueOf(port));
-		properties.put(USERNAME, username);
-		properties.put(PASSWORD, password);
+		properties.put(PORT, port);
+		properties.put(ACCESS_KEY, username);
+		properties.put(SECRET_KEY, password);
 		
 		setUp(properties);
 	}
@@ -39,9 +39,15 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 		}
 
 		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(
-				properties.get(USERNAME), properties.get(PASSWORD)));
-		dynamoDB.setEndpoint("http://" + properties.get(HOST) + ":"
-				+ properties.get(PORT));
+				properties.get(ACCESS_KEY), properties.get(SECRET_KEY)));
+		if (properties.get(HOST) != null) {
+			String url = "http://" + properties.get(HOST);
+			if (properties.get(PORT) != null) {
+				url = url + ":" + properties.get(PORT);
+			}
+			dynamoDB.setEndpoint("http://" + properties.get(HOST) + ":"
+					+ properties.get(PORT));
+		}
 	}
 
 	@Override
