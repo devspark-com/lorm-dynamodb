@@ -1,7 +1,9 @@
 package org.jstorni.lorm.mapping.strategies.entitytoitem;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,17 +33,20 @@ public class DefaultEntityToItemMappingStrategy implements
 	}
 
 	@Override
-	public AttributeDefinition getSchemaUpdate(EntitySchema entitySchema,
-			Class<?> entityClass, Field field) {
-		if (!needsUpdate(entitySchema, entityClass, field)) {
+	public List<AttributeDefinition> getSchemaUpdate(EntitySchema entitySchema,
+			Class<?> entityClass, Field field, String fieldNamePrefix) {
+		if (!needsUpdate(entitySchema, entityClass, field, fieldNamePrefix)) {
 			return null;
 		}
 
-		return buildAttributeDefinition(field);
+		List<AttributeDefinition> attrs = new ArrayList<AttributeDefinition>();
+		attrs.add(buildAttributeDefinition(field, fieldNamePrefix));
+		
+		return attrs;
 	}
 
-	protected AttributeDefinition buildAttributeDefinition(Field field) {
-		String attrName = field.getName();
+	protected AttributeDefinition buildAttributeDefinition(Field field, String fieldNamePrefix) {
+		String attrName = fieldNamePrefix + field.getName();
 		AttributeType attrType;
 		if (field.getType().equals(Boolean.class)) {
 			attrType = AttributeType.BOOLEAN;
@@ -67,25 +72,27 @@ public class DefaultEntityToItemMappingStrategy implements
 	}
 
 	protected boolean needsUpdate(EntitySchema entitySchema,
-			Class<?> entityClass, Field field) {
-		SchemaValidationError validationError = hasValidSchema(entitySchema,
-				entityClass, field);
+			Class<?> entityClass, Field field, String fieldNamePrefix) {
+		List<SchemaValidationError> validationErrors = hasValidSchema(entitySchema,
+				entityClass, field, fieldNamePrefix);
 
-		if (validationError == null) {
+		if (validationErrors == null || validationErrors.isEmpty()) {
 			return false; // nothing to do
 		}
 
-		if (validationError.getErrorType().equals(
-				SchemaValidationErrorType.WRONG_TYPE)) {
-			throw new DataValidationException("Attribute " + field.getName()
-					+ " already exists in table " + entitySchema.getName()
-					+ " but with different data type. Details: "
-					+ validationError.getMessage());
-		} else if (validationError.getErrorType().equals(
-				SchemaValidationErrorType.GENERAL)) {
-			throw new DataValidationException(
-					"Error while pushing attributes to table. Details: "
-							+ validationError.getMessage());
+		for (SchemaValidationError schemaValidationError : validationErrors) {
+			if (schemaValidationError.getErrorType().equals(
+					SchemaValidationErrorType.WRONG_TYPE)) {
+				throw new DataValidationException("Attribute " + field.getName()
+						+ " already exists in table " + entitySchema.getName()
+						+ " but with different data type. Details: "
+						+ schemaValidationError.getMessage());
+			} else if (schemaValidationError.getErrorType().equals(
+					SchemaValidationErrorType.GENERAL)) {
+				throw new DataValidationException(
+						"Error while pushing attributes to table. Details: "
+								+ schemaValidationError.getMessage());
+			}
 		}
 
 		// missing field
@@ -94,14 +101,16 @@ public class DefaultEntityToItemMappingStrategy implements
 	}
 
 	@Override
-	public SchemaValidationError hasValidSchema(EntitySchema entitySchema,
-			Class<?> entityClass, Field field) {
+	public List<SchemaValidationError> hasValidSchema(EntitySchema entitySchema,
+			Class<?> entityClass, Field field, String fieldNamePrefix) {
 
-		AttributeDefinition attrDef = buildAttributeDefinition(field);
-		
+		AttributeDefinition attrDef = buildAttributeDefinition(field, fieldNamePrefix);
+
+		List<SchemaValidationError> errors = new ArrayList<SchemaValidationError>();
 		if (entitySchema == null) {
-			return SchemaValidationError.buildGeneralError(attrDef,
-					"Table description not available");
+			errors.add(SchemaValidationError.buildGeneralError(attrDef,
+					"Table description not available"));
+			return errors;
 		}
 
 		SchemaValidationError error = null;
@@ -109,8 +118,7 @@ public class DefaultEntityToItemMappingStrategy implements
 
 		Set<AttributeDefinition> attrDefs = entitySchema.getAttributes();
 		for (AttributeDefinition attributeDefinition : attrDefs) {
-			if (attributeDefinition.getName().equals(
-					attrDef.getName())) {
+			if (attributeDefinition.getName().equals(attrDef.getName())) {
 				if (!checkAttribute(field, attributeDefinition.getType())) {
 					String message = "Invalid attribute type. Field data type: "
 							+ field.getType().getName()
@@ -128,7 +136,11 @@ public class DefaultEntityToItemMappingStrategy implements
 			error = SchemaValidationError.buildMissingFieldError(attrDef);
 		}
 
-		return error;
+		if (error != null) {
+			errors.add(error);	
+		}
+		
+		return errors;
 	}
 
 	protected boolean checkAttribute(Field field, AttributeType attrType) {
@@ -152,15 +164,19 @@ public class DefaultEntityToItemMappingStrategy implements
 	}
 
 	@Override
-	public void map(Object entity, Field field,
+	public void map(Object entity, Field field, String fieldNamePrefix,
 			Map<AttributeDefinition, Object> attributes) {
-		attributes.put(buildAttributeDefinition(field),
+		attributes.put(buildAttributeDefinition(field, fieldNamePrefix),
 				reflectionSupport.getValueOfField(field, entity));
 	}
 
 	@Override
-	public EntityFieldAsAttribute getEntityFieldAsAttribute(Field field) {
-		return new EntityFieldAsAttribute(field.getType(), field.getName());
+	public List<EntityFieldAsAttribute> getEntityFieldAsAttribute(Field field,
+			String fieldNamePrefix) {
+		List<EntityFieldAsAttribute> attrs = new ArrayList<EntityFieldAsAttribute>();
+		attrs.add(new EntityFieldAsAttribute(field.getType(), fieldNamePrefix + field.getName()));
+
+		return attrs;
 	}
 
 }

@@ -27,16 +27,18 @@ public class DateEntityToItemMappingStrategy extends
 	}
 
 	@Override
-	protected AttributeDefinition buildAttributeDefinition(Field field) {
+	protected AttributeDefinition buildAttributeDefinition(Field field,
+			String fieldNamePrefix) {
 		// TODO get constraints
-		return new AttributeDefinition(field.getName(), AttributeType.NUMBER,
-				null);
+		return new AttributeDefinition(fieldNamePrefix + field.getName(),
+				AttributeType.NUMBER, null);
 	}
 
 	@Override
-	public void map(Object entity, Field field,
+	public void map(Object entity, Field field, String fieldNamePrefix,
 			Map<AttributeDefinition, Object> attributes) {
-		AttributeDefinition attrDef = buildAttributeDefinition(field);
+		AttributeDefinition attrDef = buildAttributeDefinition(field,
+				fieldNamePrefix);
 		Object value = reflectionSupport.getValueOfField(field, entity);
 		if (value == null) {
 			attributes.put(attrDef, null);

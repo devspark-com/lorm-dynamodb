@@ -67,27 +67,26 @@ public class EntityToItemMapperImplTest {
 
 		Set<org.jstorni.lorm.schema.AttributeDefinition> attributes = new HashSet<org.jstorni.lorm.schema.AttributeDefinition>();
 
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"id", AttributeType.STRING, constraints));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"amount", AttributeType.NUMBER, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"category.id", AttributeType.STRING, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"date", AttributeType.NUMBER, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"description", AttributeType.STRING, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"merchant.id", AttributeType.STRING, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"reporter.id", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition("id",
+				AttributeType.STRING, constraints));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"amount", AttributeType.NUMBER, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"category.id", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition("date",
+				AttributeType.NUMBER, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"description", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"merchant.id", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"reporter.id", AttributeType.STRING, null));
+
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"attachment.location", AttributeType.STRING, null));
+
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"attachment.description", AttributeType.STRING, null));
 
 		EntityToItemMapperImpl<Expense> mapper = new EntityToItemMapperImpl<Expense>(
 				Expense.class);
@@ -107,28 +106,28 @@ public class EntityToItemMapperImplTest {
 		Assert.assertTrue(missingFieldsInTable.isEmpty());
 
 		attributes.clear();
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"id", AttributeType.STRING, constraints));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"category.id", AttributeType.STRING, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"description", AttributeType.STRING, null));
-		attributes
-				.add(new org.jstorni.lorm.schema.AttributeDefinition(
-						"merchant.id", AttributeType.STRING, null));
-
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition("id",
+				AttributeType.STRING, constraints));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"category.id", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"description", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"merchant.id", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"attachment.description", AttributeType.STRING, null));
+		
 		List<SchemaValidationError> negativeCaseValidationErrors = mapper
 				.validateSchema(new EntitySchema("expense", attributes));
 		Assert.assertFalse(negativeCaseValidationErrors.isEmpty());
-		Assert.assertEquals(negativeCaseValidationErrors.size(), 3);
+		Assert.assertEquals(4, negativeCaseValidationErrors.size());
 
 		for (SchemaValidationError error : negativeCaseValidationErrors) {
 			String attrName = error.getAttributeDefinition().getName();
 			Assert.assertTrue(attrName.equals("reporter.id")
-					|| attrName.equals("amount") || attrName.equals("date"));
+					|| attrName.equals("amount") 
+					|| attrName.equals("date")
+					|| attrName.equals("attachment.location"));
 		}
 
 		List<AttributeDefinition> negativeMissingFieldsInEntityClass = mapper
@@ -139,12 +138,13 @@ public class EntityToItemMapperImplTest {
 		List<AttributeDefinition> negativeFieldsInTable = mapper
 				.getMissingFieldsInTable(new EntitySchema("expense", attributes));
 		Assert.assertFalse(negativeFieldsInTable.isEmpty());
-		Assert.assertEquals(negativeFieldsInTable.size(), 3);
+		Assert.assertEquals(4, negativeFieldsInTable.size());
 
 		for (AttributeDefinition attrDef : negativeFieldsInTable) {
 			Assert.assertTrue(attrDef.getName().equals("reporter.id")
 					|| attrDef.getName().equals("amount")
-					|| attrDef.getName().equals("date"));
+					|| attrDef.getName().equals("date")
+					|| attrDef.getName().equals("attachment.location"));
 		}
 
 	}

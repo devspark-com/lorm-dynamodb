@@ -1,7 +1,9 @@
 package org.jstorni.lorm.mapping.strategies.entitytoitem;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Id;
@@ -32,16 +34,17 @@ public class ManyToOneEntityToItemMappingStrategy extends
 	}
 
 	@Override
-	protected AttributeDefinition buildAttributeDefinition(Field field) {
+	protected AttributeDefinition buildAttributeDefinition(Field field,
+			String fieldNamePrefix) {
 		Field refIdField = reflectionSupport.getFieldWithAnnotation(
 				field.getType(), Id.class);
 
-		return new AttributeDefinition(field.getName() + "."
+		return new AttributeDefinition(fieldNamePrefix + field.getName() + "."
 				+ refIdField.getName(), AttributeType.STRING, null);
 	}
 
 	@Override
-	public void map(Object entity, Field field,
+	public void map(Object entity, Field field, String fieldNamePrefix,
 			Map<AttributeDefinition, Object> attributes) {
 		// TODO it is assumed that the reference was or will be
 		// persisted by the specific repository
@@ -60,17 +63,22 @@ public class ManyToOneEntityToItemMappingStrategy extends
 			value = null;
 		}
 
-		AttributeDefinition attrDef = buildAttributeDefinition(field);
+		AttributeDefinition attrDef = buildAttributeDefinition(field,
+				fieldNamePrefix);
 		attributes.put(attrDef, value);
 	}
 
 	@Override
-	public EntityFieldAsAttribute getEntityFieldAsAttribute(Field field) {
+	public List<EntityFieldAsAttribute> getEntityFieldAsAttribute(Field field,
+			String fieldNamePrefix) {
 		Field refIdField = reflectionSupport.getFieldWithAnnotation(
 				field.getType(), Id.class);
 
-		return new EntityFieldAsAttribute(String.class, field.getName() + "."
-				+ refIdField.getName());
+		List<EntityFieldAsAttribute> attrs = new ArrayList<EntityFieldAsAttribute>();
+		attrs.add(new EntityFieldAsAttribute(String.class, fieldNamePrefix
+				+ field.getName() + "." + refIdField.getName()));
+
+		return attrs;
 	}
 
 }

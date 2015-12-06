@@ -30,7 +30,7 @@ public class DummyEntityManager implements EntityManager {
 
 	@Override
 	public <T> void addEntity(Class<T> entityClass,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport) {
 		repositories.put(entityClass, new DummyRepository<T>(entityClass));

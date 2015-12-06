@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import org.jstorni.lorm.ReflectionSupport;
 import org.jstorni.lorm.exceptions.DataException;
 
-public class EntityIdHandler<T> {
+public class EntityIdHandler {
 
 	private final ReflectionSupport reflectionSupport;
 	private final Field idField;
@@ -24,18 +24,18 @@ public class EntityIdHandler<T> {
 		return idField.getName();
 	}
 
-	public String getIdValue(T entity) {
+	public String getIdValue(Object entity) {
 		Object idValue = reflectionSupport.getValueOfField(idField, entity);
 		// TODO assuming String id
 		return (String) idValue;
 	}
 
-	public void setIdValue(T entity, String id) {
+	public void setIdValue(Object entity, String id) {
 		// TODO assuming String id
 		reflectionSupport.setValueOfField(idField, entity, id);
 	}
 
-	public String generateId(T entity) {
+	public String generateId(Object entity) {
 		GeneratedValue idAnnotation = idField
 				.getAnnotation(GeneratedValue.class);
 		if (idAnnotation.generator() == null) {

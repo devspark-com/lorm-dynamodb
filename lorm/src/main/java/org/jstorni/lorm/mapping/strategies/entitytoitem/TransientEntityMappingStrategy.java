@@ -1,6 +1,7 @@
 package org.jstorni.lorm.mapping.strategies.entitytoitem;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Transient;
@@ -19,24 +20,26 @@ public class TransientEntityMappingStrategy implements
 	}
 
 	@Override
-	public EntityFieldAsAttribute getEntityFieldAsAttribute(Field field) {
+	public List<EntityFieldAsAttribute> getEntityFieldAsAttribute(Field field,
+			String fieldNamePrefix) {
 		return null;
 	}
 
 	@Override
-	public AttributeDefinition getSchemaUpdate(EntitySchema entitySchema,
-			Class<?> entityClass, Field field) {
+	public List<AttributeDefinition> getSchemaUpdate(EntitySchema entitySchema,
+			Class<?> entityClass, Field field, String fieldNamePrefix) {
 		return null;
 	}
 
 	@Override
-	public SchemaValidationError hasValidSchema(EntitySchema entitySchema,
-			Class<?> entityClass, Field field) {
+	public List<SchemaValidationError> hasValidSchema(
+			EntitySchema entitySchema, Class<?> entityClass, Field field,
+			String fieldNamePrefix) {
 		return null;
 	}
 
 	@Override
-	public void map(Object entity, Field field,
+	public void map(Object entity, Field field, String fieldNamePrefix,
 			Map<AttributeDefinition, Object> attributes) {
 	}
 }

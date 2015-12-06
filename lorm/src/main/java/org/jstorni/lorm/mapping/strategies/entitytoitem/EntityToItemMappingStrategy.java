@@ -1,6 +1,7 @@
 package org.jstorni.lorm.mapping.strategies.entitytoitem;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 import org.jstorni.lorm.schema.AttributeDefinition;
@@ -10,15 +11,16 @@ import org.jstorni.lorm.schema.validation.SchemaValidationError;
 
 public interface EntityToItemMappingStrategy {
 
-	SchemaValidationError hasValidSchema(EntitySchema entitySchema,
-			Class<?> entityClass, Field field);
+	List<SchemaValidationError> hasValidSchema(EntitySchema entitySchema,
+			Class<?> entityClass, Field field, String fieldNamePrefix);
 
-	AttributeDefinition getSchemaUpdate(EntitySchema entitySchema,
-			Class<?> entityClass, Field field);
+	List<AttributeDefinition> getSchemaUpdate(EntitySchema entitySchema,
+			Class<?> entityClass, Field field, String fieldNamePrefix);
 
-	EntityFieldAsAttribute getEntityFieldAsAttribute(Field field);
+	List<EntityFieldAsAttribute> getEntityFieldAsAttribute(Field field, String fieldNamePrefix);
 
 	boolean apply(Field field);
 
-	void map(Object entity, Field field, Map<AttributeDefinition, Object> attributes);
+	void map(Object entity, Field field, String fieldNamePrefix,
+			Map<AttributeDefinition, Object> attributes);
 }

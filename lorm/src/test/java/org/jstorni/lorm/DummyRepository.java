@@ -33,7 +33,7 @@ public class DummyRepository<T> implements Repository<T> {
 
 	@Override
 	public T save(T instance) {
-		EntityIdHandler<T> idHandler = new EntityIdHandler<T>(entityClass);
+		EntityIdHandler idHandler = new EntityIdHandler(entityClass);
 		String id = idHandler.getIdValue(instance);
 		if (id == null) {
 			String generatedId = idHandler.generateId(instance);
