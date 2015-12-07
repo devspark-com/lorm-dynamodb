@@ -38,7 +38,7 @@ public class EntityIdHandler {
 	public String generateId(Object entity) {
 		GeneratedValue idAnnotation = idField
 				.getAnnotation(GeneratedValue.class);
-		if (idAnnotation.generator() == null) {
+		if (idAnnotation == null || idAnnotation.generator() == null) {
 			return null;
 		}
 

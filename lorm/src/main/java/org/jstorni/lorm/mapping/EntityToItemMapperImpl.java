@@ -60,7 +60,7 @@ public class EntityToItemMapperImpl<T> implements EntityToItemMapper,
 		if (entity == null) {
 			return attributes;
 		}
-		
+
 		// it is assumed that entity will be validated before
 		// mapping to Item
 
@@ -117,6 +117,7 @@ public class EntityToItemMapperImpl<T> implements EntityToItemMapper,
 						// TODO move field naming to an strategy?
 						String embeddedFieldamePrefix = fieldNamePrefix
 								+ field.getName() + ".";
+
 						List<SchemaValidationError> currentErrors = validateSchema(
 								entitySchema, field.getType(),
 								embeddedFieldamePrefix);
