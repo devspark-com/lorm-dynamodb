@@ -52,7 +52,7 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 
 	@Override
 	public <T> void addEntity(Class<T> entityClass,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport) {
 		getAllRepositories().put(

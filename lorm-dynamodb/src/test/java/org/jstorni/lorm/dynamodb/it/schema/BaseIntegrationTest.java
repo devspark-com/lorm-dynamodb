@@ -37,9 +37,12 @@ public class BaseIntegrationTest {
 	}
 
 	public void setupLocal() {
-		entityManager = new DynamoDBEntityManager(HOST, PORT, "", "");
+		String host = HOST != null ? HOST : "localhost";
+		String port = PORT != null ? PORT : "8000";
+
+		entityManager = new DynamoDBEntityManager(host, port, "", "");
 		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials("", ""));
-		dynamoDB.setEndpoint("http://" + HOST + ":" + PORT);
+		dynamoDB.setEndpoint("http://" + host + ":" + port);
 	}
 
 	public void setupRemote() {
@@ -52,13 +55,12 @@ public class BaseIntegrationTest {
 			if (PORT != null) {
 				url = url + ":" + PORT;
 			}
-			dynamoDB.setEndpoint("http://" + HOST + ":"
-					+ PORT);
+			dynamoDB.setEndpoint("http://" + HOST + ":" + PORT);
 		}
 	}
 
 	protected <T> void addToEntityManager(Class<T> entityClass) {
-		EntityToItemMapper<T> entityToItemMapper = new EntityToItemMapperImpl<T>(
+		EntityToItemMapper entityToItemMapper = new EntityToItemMapperImpl<T>(
 				entityClass);
 		EntitySchemaSupport entitySchemaSupport = new EntityToItemMapperImpl<T>(
 				entityClass);
