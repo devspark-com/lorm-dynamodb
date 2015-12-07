@@ -4,8 +4,8 @@ import java.util.Map;
 
 import org.jstorni.lorm.schema.AttributeDefinition;
 
-public interface EntityToItemMapper<T> {
+public interface EntityToItemMapper {
 
-	Map<AttributeDefinition, Object> map(T entity);
+	Map<AttributeDefinition, Object> map(Object entity);
 
 }

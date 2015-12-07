@@ -13,7 +13,7 @@ public class EntityIdHandlerTest {
 		merchant.setName("something");
 		merchant.setId("123456");
 
-		EntityIdHandler<Merchant> entityIdHandler = new EntityIdHandler<Merchant>(
+		EntityIdHandler entityIdHandler = new EntityIdHandler(
 				Merchant.class);
 
 		Assert.assertEquals("Id", "123456",
@@ -25,7 +25,7 @@ public class EntityIdHandlerTest {
 		Merchant merchant = new Merchant();
 		merchant.setName("something");
 
-		EntityIdHandler<Merchant> entityIdHandler = new EntityIdHandler<Merchant>(
+		EntityIdHandler entityIdHandler = new EntityIdHandler(
 				Merchant.class);
 		entityIdHandler.setIdValue(merchant, "123456");
 
@@ -38,7 +38,7 @@ public class EntityIdHandlerTest {
 		Merchant merchant = new Merchant();
 		merchant.setName("something");
 
-		EntityIdHandler<Merchant> entityIdHandler = new EntityIdHandler<Merchant>(
+		EntityIdHandler entityIdHandler = new EntityIdHandler(
 				Merchant.class);
 		entityIdHandler.setIdValue(merchant,
 				entityIdHandler.generateId(merchant));

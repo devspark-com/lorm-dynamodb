@@ -7,7 +7,7 @@ import org.jstorni.lorm.schema.validation.EntitySchemaSupport;
 public interface EntityManager {
 
 	<T> void addEntity(Class<T> entityClass,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport);
 

@@ -32,7 +32,7 @@ public abstract class AbstractEntityManagerImpl implements EntityManager {
 
 	@Override
 	public abstract <T> void addEntity(Class<T> entityClass,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport);
 
