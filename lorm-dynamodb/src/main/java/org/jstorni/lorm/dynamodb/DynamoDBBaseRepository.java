@@ -38,7 +38,7 @@ import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 		implements Repository<T>, SchemaSupport<T> {
 
-	private final EntityToItemMapper<T> entityToItemMapper;
+	private final EntityToItemMapper entityToItemMapper;
 	private final ItemToEntityMapper<T> itemToEntityMapper;
 	private final int batchCoreThreadCount;
 	private final int batchMaxThreadCount;
@@ -53,7 +53,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	private final static int BATCH_EXECUTOR_DEFAULT_MAX_THREADS = 25;
 
 	public DynamoDBBaseRepository(DynamoDB dynamoDB,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass) {
 		this(dynamoDB, entityToItemMapper, itemToEntityMapper,
@@ -63,7 +63,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	}
 
 	public DynamoDBBaseRepository(DynamoDB dynamoDB,
-			EntityToItemMapper<T> entityToItemMapper,
+			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
 			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass,
 			int batchCoreThreadCount, int batchMaxThreadCount) {

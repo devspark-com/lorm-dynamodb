@@ -6,6 +6,9 @@ import java.util.List;
 import org.jstorni.lorm.Repository;
 import org.jstorni.lorm.test.model.Expense;
 import org.jstorni.lorm.test.model.Merchant;
+import org.jstorni.lorm.test.model.embedded.DeepEmbedded;
+import org.jstorni.lorm.test.model.embedded.SampleEmbeddable;
+import org.jstorni.lorm.test.model.embedded.SampleEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,11 +21,14 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
 		addToEntityManager(Merchant.class);
 		addToEntityManager(Expense.class);
+		addToEntityManager(SampleEntity.class);
 
 		setupSchemaForEntity(Merchant.class);
 		setupSchemaForEntity(Expense.class);
+		setupSchemaForEntity(SampleEntity.class);
 
 		// remove all merchants
+
 		Repository<Merchant> merchantRepository = entityManager
 				.getRepository(Merchant.class);
 
@@ -54,6 +60,43 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 	}
 
 	@Test
+	public void testEmbedded() {
+		SampleEntity sampleEntity = new SampleEntity();
+		sampleEntity.setId("abarajame");
+		sampleEntity.setSomeRandomField("random field");
+		sampleEntity.setEmbedded(buildSampleEmbeddable());
+
+		Repository<SampleEntity> repository = entityManager
+				.getRepository(SampleEntity.class);
+
+		repository.save(sampleEntity);
+		
+		SampleEntity savedSampleEntity = repository.findOne("abarajame");
+		
+		Assert.assertNotNull(savedSampleEntity);
+		Assert.assertNotNull(savedSampleEntity.getEmbedded());
+		Assert.assertNotNull(savedSampleEntity.getEmbedded().getDeepEmbedded());
+		
+		Assert.assertEquals("random field",
+				savedSampleEntity.getSomeRandomField());
+		Assert.assertEquals("some embedded field", savedSampleEntity.getEmbedded()
+				.getSomeField());
+		Assert.assertEquals("some deep embedded field", savedSampleEntity.getEmbedded()
+				.getDeepEmbedded().getEmbeddedField());
+	}
+
+	private SampleEmbeddable buildSampleEmbeddable() {
+		DeepEmbedded deepEmbedded = new DeepEmbedded();
+		deepEmbedded.setEmbeddedField("some deep embedded field");
+		
+		SampleEmbeddable sampleEmbeddable = new SampleEmbeddable();
+		sampleEmbeddable.setSomeField("some embedded field");
+		sampleEmbeddable.setDeepEmbedded(deepEmbedded);
+
+		return sampleEmbeddable;
+	}
+
+	@Test
 	public void testSingle() {
 		Repository<Merchant> repository = entityManager
 				.getRepository(Merchant.class);
@@ -72,7 +115,7 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 		Assert.assertNotNull(foundMerchant);
 		Assert.assertEquals(merchant.getId(), foundMerchant.getId());
 		Assert.assertEquals("new merchant", foundMerchant.getName());
-		
+
 		// update
 		foundMerchant.setName("updated name");
 		repository.save(foundMerchant);
@@ -80,7 +123,7 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 		Assert.assertNotNull(updatedMerchant);
 		Assert.assertEquals(merchant.getId(), updatedMerchant.getId());
 		Assert.assertEquals("updated name", updatedMerchant.getName());
-		
+
 		// delete
 		repository.deleteById(merchant.getId());
 		Merchant deletedMerchant = repository.findOne(merchant.getId());
@@ -111,7 +154,8 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 			boolean found = false;
 			for (Merchant savedMerchant : savedMerchants) {
 				if (merchant.getId().equals(savedMerchant.getId())) {
-					Assert.assertEquals(merchant.getName(), savedMerchant.getName());
+					Assert.assertEquals(merchant.getName(),
+							savedMerchant.getName());
 					found = true;
 					break;
 				}
@@ -119,12 +163,12 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
 			Assert.assertTrue("Merchant not found", found);
 		}
-		
+
 		// update all
 		for (Merchant merchant : merchants) {
 			merchant.setName("updated name");
 		}
-		
+
 		repository.save(merchants);
 
 		// check batch update
@@ -137,7 +181,8 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 			boolean found = false;
 			for (Merchant updatedMerchant : updatedMerchants) {
 				if (merchant.getId().equals(updatedMerchant.getId())) {
-					Assert.assertEquals("updated name", updatedMerchant.getName());
+					Assert.assertEquals("updated name",
+							updatedMerchant.getName());
 					found = true;
 					break;
 				}
@@ -145,9 +190,7 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
 			Assert.assertTrue("Merchant not found", found);
 		}
-		
-		
-		
+
 	}
 
 }

@@ -32,7 +32,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 
 public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 
-	private final EntityIdHandler<T> idHandler;
+	private final EntityIdHandler idHandler;
 	private Table table;
 	private final DynamoDB dynamoDB;
 	private final Class<?> entityClass;
@@ -42,7 +42,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	public DynamoDBSchemaSupport(DynamoDB dynamoDB,
 			EntitySchemaSupport entitySchemaSupport, 
 			Class<?> entityClass) {
-		idHandler = new EntityIdHandler<T>(entityClass);
+		idHandler = new EntityIdHandler(entityClass);
 		this.dynamoDB = dynamoDB;
 		this.entitySchemaSupport = entitySchemaSupport;
 		this.entityClass = entityClass;
@@ -72,7 +72,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 		return dynamoDB;
 	}
 
-	protected EntityIdHandler<T> getIdHandler() {
+	protected EntityIdHandler getIdHandler() {
 		return idHandler;
 	}
 	
@@ -82,7 +82,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	
 	
 	@Override
-	public boolean isValid(List<SchemaValidationError> errors) {
+	public boolean isValid(final List<SchemaValidationError> errors) {
 
 		if (getTable().getDescription() == null) {
 			try {
