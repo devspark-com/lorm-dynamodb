@@ -13,6 +13,8 @@ import org.jstorni.lorm.schema.EntitySchema;
 import org.jstorni.lorm.schema.validation.SchemaValidationError;
 import org.jstorni.lorm.test.model.Expense;
 import org.jstorni.lorm.test.model.Merchant;
+import org.jstorni.lorm.test.model.embedded.SampleEmbeddable;
+import org.jstorni.lorm.test.model.embedded.SampleEntity;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -116,7 +118,7 @@ public class EntityToItemMapperImplTest {
 				"merchant.id", AttributeType.STRING, null));
 		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
 				"attachment.description", AttributeType.STRING, null));
-		
+
 		List<SchemaValidationError> negativeCaseValidationErrors = mapper
 				.validateSchema(new EntitySchema("expense", attributes));
 		Assert.assertFalse(negativeCaseValidationErrors.isEmpty());
@@ -125,8 +127,7 @@ public class EntityToItemMapperImplTest {
 		for (SchemaValidationError error : negativeCaseValidationErrors) {
 			String attrName = error.getAttributeDefinition().getName();
 			Assert.assertTrue(attrName.equals("reporter.id")
-					|| attrName.equals("amount") 
-					|| attrName.equals("date")
+					|| attrName.equals("amount") || attrName.equals("date")
 					|| attrName.equals("attachment.location"));
 		}
 
@@ -148,4 +149,38 @@ public class EntityToItemMapperImplTest {
 		}
 
 	}
+
+	@Test
+	public void testDeepEmbeddedMap() {
+		SampleEntity sampleEntity = new SampleEntity();
+		sampleEntity.setSomeRandomField("random field");
+		sampleEntity.setEmbedded(buildSampleEmbeddable(5));
+
+		EntityToItemMapperImpl<SampleEntity> mapper = new EntityToItemMapperImpl<SampleEntity>(
+				SampleEntity.class);
+
+		Map<AttributeDefinition, Object> attrs = mapper.map(sampleEntity);
+
+		String attrName = "embedded";
+		for (int i = 5; i > 0; i--) {
+			AttributeDefinition expectedAttr = new AttributeDefinition(attrName
+					+ ".someField", AttributeType.STRING, null);
+			Assert.assertTrue(attrs.containsKey(expectedAttr));
+			Assert.assertEquals("some field " + i, attrs.get(expectedAttr));
+			
+			attrName = attrName + ".deepEmbedded";
+		}
+
+	}
+
+	private SampleEmbeddable buildSampleEmbeddable(int levels) {
+		SampleEmbeddable sampleEmbeddable = new SampleEmbeddable();
+		sampleEmbeddable.setSomeField("some field " + levels);
+		if (levels > 0) {
+			sampleEmbeddable.setDeepEmbedded(buildSampleEmbeddable(--levels));
+		}
+
+		return sampleEmbeddable;
+	}
+
 }

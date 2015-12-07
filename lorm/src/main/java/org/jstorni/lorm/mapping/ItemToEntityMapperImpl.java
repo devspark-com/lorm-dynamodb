@@ -60,8 +60,25 @@ public class ItemToEntityMapperImpl<E> implements ItemToEntityMapper<E> {
 				.entrySet()) {
 			String fieldKey = itemEntry.getKey().getName();
 			if (fieldKey.contains(".")) {
-				fieldKey = fieldKey.substring(fieldNamePrefix.length(),
-						fieldKey.indexOf('.', fieldNamePrefix.length()));
+				if (fieldNamePrefix.isEmpty()) {
+					fieldKey = fieldKey.substring(0, fieldKey.indexOf('.'));
+				} else {
+					if (fieldKey.indexOf('.', fieldNamePrefix.length()) > 0) {
+						fieldKey = fieldKey.substring(fieldNamePrefix.length(),
+								fieldKey.indexOf('.', fieldNamePrefix.length()));						
+					} else {
+						if (fieldNamePrefix.length() < fieldKey.length()) {
+							fieldKey = fieldKey.substring(fieldNamePrefix.length());	
+						} else {
+							continue;
+						}
+																		
+					}
+				}
+			} else {
+				if (!fieldNamePrefix.isEmpty()) {
+					continue;
+				}
 			}
 
 			Field field = getFieldByName(fieldKey, fields);
