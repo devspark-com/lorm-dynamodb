@@ -21,14 +21,13 @@ public class SchemaValidationError {
 		this.validationScope = validationScope;
 	}
 
-	public static SchemaValidationError buildTableError(String tableName, String message) {
+	public static SchemaValidationError buildTableError(String tableName,
+			String message) {
 		return new SchemaValidationError(null,
-				SchemaValidationErrorType.GENERAL,
-				SchemaValidationScope.TABLE, tableName,
-				message);
+				SchemaValidationErrorType.GENERAL, SchemaValidationScope.TABLE,
+				tableName, message);
 	}
 
-	
 	public static SchemaValidationError buildGeneralError(
 			AttributeDefinition attributeDefinition, String message) {
 		return new SchemaValidationError(attributeDefinition,
@@ -71,6 +70,17 @@ public class SchemaValidationError {
 				SchemaValidationErrorType.MISSING_IN_ENTITY,
 				SchemaValidationScope.ATTRIBUTE, attributeDefinition.getName(),
 				message);
+	}
+
+	public static SchemaValidationError buildRecursiveError(
+			Class<?> entityClass, Class<?> recursiveClass,
+			String attributeName) {
+		return new SchemaValidationError(null,
+				SchemaValidationErrorType.GENERAL,
+				SchemaValidationScope.ATTRIBUTE, attributeName,
+				"Found recursive dependency path on entity "
+						+ entityClass.getName() + ", with dependency type "
+						+ recursiveClass.getName());
 	}
 
 	public AttributeDefinition getAttributeDefinition() {
