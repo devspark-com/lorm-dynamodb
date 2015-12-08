@@ -11,6 +11,8 @@ import org.jstorni.lorm.schema.AttributeDefinition;
 import org.jstorni.lorm.schema.AttributeType;
 import org.jstorni.lorm.schema.EntitySchema;
 import org.jstorni.lorm.schema.validation.SchemaValidationError;
+import org.jstorni.lorm.schema.validation.SchemaValidationErrorType;
+import org.jstorni.lorm.schema.validation.SchemaValidationScope;
 import org.jstorni.lorm.test.model.Expense;
 import org.jstorni.lorm.test.model.Merchant;
 import org.jstorni.lorm.test.model.embedded.SampleEmbeddable;
@@ -167,9 +169,47 @@ public class EntityToItemMapperImplTest {
 					+ ".someField", AttributeType.STRING, null);
 			Assert.assertTrue(attrs.containsKey(expectedAttr));
 			Assert.assertEquals("some field " + i, attrs.get(expectedAttr));
-			
+
 			attrName = attrName + ".deepEmbedded";
 		}
+	}
+
+	@Test
+	public void testSchemaValidationWithRecursiveDependencies() {
+		Set<AttributeConstraint> constraints = new HashSet<AttributeConstraint>();
+		constraints.add(AttributeConstraint.buildPrimaryKeyConstraint());
+
+		Set<org.jstorni.lorm.schema.AttributeDefinition> attributes = new HashSet<org.jstorni.lorm.schema.AttributeDefinition>();
+
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition("id",
+				AttributeType.STRING, constraints));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"someRandomField", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"embedded.someField", AttributeType.STRING, null));
+		attributes.add(new org.jstorni.lorm.schema.AttributeDefinition(
+				"embedded.deepEmbedded", AttributeType.STRING, null));
+
+		EntityToItemMapperImpl<SampleEntity> mapper = new EntityToItemMapperImpl<SampleEntity>(
+				SampleEntity.class);
+
+		List<SchemaValidationError> positiveCaseValidationErrors = mapper
+				.validateSchema(new EntitySchema("sampleentity", attributes));
+
+		// TODO expect error of recursive dependency path
+		Assert.assertEquals(1, positiveCaseValidationErrors.size());
+
+		SchemaValidationError recursiveDependencyError = positiveCaseValidationErrors
+				.get(0);
+		Assert.assertNotNull(recursiveDependencyError);
+		Assert.assertEquals(SchemaValidationErrorType.GENERAL,
+				recursiveDependencyError.getErrorType());
+		Assert.assertEquals("deepEmbedded",
+				recursiveDependencyError.getIdentifier());
+		Assert.assertEquals(SchemaValidationScope.ATTRIBUTE,
+				recursiveDependencyError.getValidationScope());
+		Assert.assertTrue(recursiveDependencyError.getMessage().contains(
+				"recursive"));
 
 	}
 
