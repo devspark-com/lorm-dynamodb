@@ -1,4 +1,4 @@
-package org.jstorni.lorm.test.model;
+package org.devspark.aws.lorm.test.model;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;

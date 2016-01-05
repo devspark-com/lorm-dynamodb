@@ -1,4 +1,4 @@
-package org.jstorni.lorm.dynamodb;
+package org.devspark.aws.lorm.dynamodb;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +14,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jstorni.lorm.Repository;
-import org.jstorni.lorm.SchemaSupport;
-import org.jstorni.lorm.exceptions.DataException;
-import org.jstorni.lorm.exceptions.DataValidationException;
-import org.jstorni.lorm.mapping.EntityToItemMapper;
-import org.jstorni.lorm.mapping.ItemToEntityMapper;
-import org.jstorni.lorm.schema.AttributeConstraint;
-import org.jstorni.lorm.schema.AttributeDefinition;
-import org.jstorni.lorm.schema.validation.EntitySchemaSupport;
+import org.devspark.aws.lorm.Repository;
+import org.devspark.aws.lorm.SchemaSupport;
+import org.devspark.aws.lorm.exceptions.DataException;
+import org.devspark.aws.lorm.exceptions.DataValidationException;
+import org.devspark.aws.lorm.mapping.EntityToItemMapper;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapper;
+import org.devspark.aws.lorm.schema.AttributeConstraint;
+import org.devspark.aws.lorm.schema.AttributeDefinition;
+import org.devspark.aws.lorm.schema.validation.EntitySchemaSupport;
 
 import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;

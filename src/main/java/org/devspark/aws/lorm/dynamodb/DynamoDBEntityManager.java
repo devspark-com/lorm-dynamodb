@@ -1,12 +1,12 @@
-package org.jstorni.lorm.dynamodb;
+package org.devspark.aws.lorm.dynamodb;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jstorni.lorm.AbstractEntityManagerImpl;
-import org.jstorni.lorm.mapping.EntityToItemMapper;
-import org.jstorni.lorm.mapping.ItemToEntityMapper;
-import org.jstorni.lorm.schema.validation.EntitySchemaSupport;
+import org.devspark.aws.lorm.AbstractEntityManagerImpl;
+import org.devspark.aws.lorm.mapping.EntityToItemMapper;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapper;
+import org.devspark.aws.lorm.schema.validation.EntitySchemaSupport;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;

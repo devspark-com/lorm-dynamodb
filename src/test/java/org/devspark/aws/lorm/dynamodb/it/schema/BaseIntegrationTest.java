@@ -1,16 +1,16 @@
-package org.jstorni.lorm.dynamodb.it.schema;
+package org.devspark.aws.lorm.dynamodb.it.schema;
 
 import java.util.ArrayList;
 
-import org.jstorni.lorm.EntityManager;
-import org.jstorni.lorm.SchemaSupport;
-import org.jstorni.lorm.dynamodb.DynamoDBEntityManager;
-import org.jstorni.lorm.mapping.EntityToItemMapper;
-import org.jstorni.lorm.mapping.EntityToItemMapperImpl;
-import org.jstorni.lorm.mapping.ItemToEntityMapper;
-import org.jstorni.lorm.mapping.ItemToEntityMapperImpl;
-import org.jstorni.lorm.schema.validation.EntitySchemaSupport;
-import org.jstorni.lorm.schema.validation.SchemaValidationError;
+import org.devspark.aws.lorm.EntityManager;
+import org.devspark.aws.lorm.SchemaSupport;
+import org.devspark.aws.lorm.dynamodb.DynamoDBEntityManager;
+import org.devspark.aws.lorm.mapping.EntityToItemMapper;
+import org.devspark.aws.lorm.mapping.EntityToItemMapperImpl;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapper;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapperImpl;
+import org.devspark.aws.lorm.schema.validation.EntitySchemaSupport;
+import org.devspark.aws.lorm.schema.validation.SchemaValidationError;
 
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;

@@ -1,4 +1,4 @@
-package org.jstorni.lorm.test.model;
+package org.devspark.aws.lorm.test.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.devspark.aws.lorm.test.model.BaseEntity;
+import org.devspark.aws.lorm.test.model.Merchant;
 
 @Entity
 public class Expense extends BaseEntity {

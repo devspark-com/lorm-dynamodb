@@ -1,4 +1,4 @@
-package org.jstorni.lorm.test.model.embedded;
+package org.devspark.aws.lorm.test.model.embedded;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;

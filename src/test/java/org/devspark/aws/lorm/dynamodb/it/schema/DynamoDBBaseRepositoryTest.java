@@ -1,14 +1,14 @@
-package org.jstorni.lorm.dynamodb.it.schema;
+package org.devspark.aws.lorm.dynamodb.it.schema;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jstorni.lorm.Repository;
-import org.jstorni.lorm.test.model.Expense;
-import org.jstorni.lorm.test.model.Merchant;
-import org.jstorni.lorm.test.model.embedded.DeepEmbedded;
-import org.jstorni.lorm.test.model.embedded.SampleEmbeddable;
-import org.jstorni.lorm.test.model.embedded.SampleEntity;
+import org.devspark.aws.lorm.Repository;
+import org.devspark.aws.lorm.test.model.Expense;
+import org.devspark.aws.lorm.test.model.Merchant;
+import org.devspark.aws.lorm.test.model.embedded.DeepEmbedded;
+import org.devspark.aws.lorm.test.model.embedded.SampleEmbeddable;
+import org.devspark.aws.lorm.test.model.embedded.SampleEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

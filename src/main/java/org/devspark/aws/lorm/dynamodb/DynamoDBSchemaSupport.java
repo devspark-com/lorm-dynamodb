@@ -1,4 +1,4 @@
-package org.jstorni.lorm.dynamodb;
+package org.devspark.aws.lorm.dynamodb;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,16 +9,16 @@ import java.util.function.Predicate;
 
 import javax.persistence.Entity;
 
-import org.jstorni.lorm.SchemaSupport;
-import org.jstorni.lorm.exceptions.DataException;
-import org.jstorni.lorm.exceptions.DataValidationException;
-import org.jstorni.lorm.id.EntityIdHandler;
-import org.jstorni.lorm.schema.AttributeConstraint;
-import org.jstorni.lorm.schema.AttributeDefinition;
-import org.jstorni.lorm.schema.AttributeType;
-import org.jstorni.lorm.schema.EntitySchema;
-import org.jstorni.lorm.schema.validation.EntitySchemaSupport;
-import org.jstorni.lorm.schema.validation.SchemaValidationError;
+import org.devspark.aws.lorm.SchemaSupport;
+import org.devspark.aws.lorm.exceptions.DataException;
+import org.devspark.aws.lorm.exceptions.DataValidationException;
+import org.devspark.aws.lorm.id.EntityIdHandler;
+import org.devspark.aws.lorm.schema.AttributeConstraint;
+import org.devspark.aws.lorm.schema.AttributeDefinition;
+import org.devspark.aws.lorm.schema.AttributeType;
+import org.devspark.aws.lorm.schema.EntitySchema;
+import org.devspark.aws.lorm.schema.validation.EntitySchemaSupport;
+import org.devspark.aws.lorm.schema.validation.SchemaValidationError;
 
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;

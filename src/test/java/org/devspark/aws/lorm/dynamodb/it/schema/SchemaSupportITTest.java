@@ -1,15 +1,15 @@
-package org.jstorni.lorm.dynamodb.it.schema;
+package org.devspark.aws.lorm.dynamodb.it.schema;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jstorni.lorm.dynamodb.DynamoDBBaseRepository;
-import org.jstorni.lorm.mapping.EntityToItemMapperImpl;
-import org.jstorni.lorm.mapping.ItemToEntityMapper;
-import org.jstorni.lorm.mapping.ItemToEntityMapperImpl;
-import org.jstorni.lorm.schema.validation.SchemaValidationError;
-import org.jstorni.lorm.test.model.Expense;
-import org.jstorni.lorm.test.model.Merchant;
+import org.devspark.aws.lorm.dynamodb.DynamoDBBaseRepository;
+import org.devspark.aws.lorm.mapping.EntityToItemMapperImpl;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapper;
+import org.devspark.aws.lorm.mapping.ItemToEntityMapperImpl;
+import org.devspark.aws.lorm.schema.validation.SchemaValidationError;
+import org.devspark.aws.lorm.test.model.Expense;
+import org.devspark.aws.lorm.test.model.Merchant;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

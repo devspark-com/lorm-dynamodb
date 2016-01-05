@@ -1,8 +1,10 @@
-package org.jstorni.lorm.test.model;
+package org.devspark.aws.lorm.test.model;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.devspark.aws.lorm.test.model.BaseEntity;
 
 @Entity
 public class Merchant extends BaseEntity {
