@@ -6,7 +6,7 @@ import javax.persistence.Id;
 public abstract class BaseEntity {
 
 	@Id
-	@GeneratedValue(generator = "org.jstorni.lorm.id.UUIDIdGenerator")
+	@GeneratedValue(generator = "org.devspark.aws.lorm.id.UUIDIdGenerator")
 	private String id;
 
 	public String getId() {
