@@ -35,13 +35,12 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	private final EntityIdHandler idHandler;
 	private Table table;
 	private final DynamoDB dynamoDB;
-	private final Class<?> entityClass;
+	private final Class<T> entityClass;
 	private final EntitySchemaSupport entitySchemaSupport;
 
-	
 	public DynamoDBSchemaSupport(DynamoDB dynamoDB,
 			EntitySchemaSupport entitySchemaSupport, 
-			Class<?> entityClass) {
+			Class<T> entityClass) {
 		idHandler = new EntityIdHandler(entityClass);
 		this.dynamoDB = dynamoDB;
 		this.entitySchemaSupport = entitySchemaSupport;
@@ -49,6 +48,10 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 		table = getDynamoDbTable();
 	}
 
+	public Class<T> getEntityClass() {
+		return entityClass;
+	}
+	
 	private Table getDynamoDbTable() {
 		Entity entityAnnotation = entityClass.getAnnotation(Entity.class);
 		if (entityAnnotation == null) {
@@ -75,12 +78,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	protected EntityIdHandler getIdHandler() {
 		return idHandler;
 	}
-	
-	protected Class<?> getEntityClass() {
-		return entityClass;
-	}
-	
-	
+
 	@Override
 	public boolean isValid(final List<SchemaValidationError> errors) {
 

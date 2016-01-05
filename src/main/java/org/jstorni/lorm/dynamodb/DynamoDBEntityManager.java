@@ -31,6 +31,10 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 		
 		setUp(properties);
 	}
+	
+	public DynamoDBEntityManager() {
+		this(null, null, null, null);
+	}
 
 	@Override
 	protected void setUp(Map<String, String> properties) {
@@ -38,8 +42,14 @@ public class DynamoDBEntityManager extends AbstractEntityManagerImpl {
 			return;
 		}
 
-		dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(
-				properties.get(ACCESS_KEY), properties.get(SECRET_KEY)));
+		if (properties.get(ACCESS_KEY) == null || 
+				properties.get(SECRET_KEY) == null) {
+			dynamoDB = new AmazonDynamoDBClient();
+		} else {
+			dynamoDB = new AmazonDynamoDBClient(new BasicAWSCredentials(
+					properties.get(ACCESS_KEY), properties.get(SECRET_KEY)));			
+		}
+		
 		if (properties.get(HOST) != null) {
 			String url = "http://" + properties.get(HOST);
 			if (properties.get(PORT) != null) {

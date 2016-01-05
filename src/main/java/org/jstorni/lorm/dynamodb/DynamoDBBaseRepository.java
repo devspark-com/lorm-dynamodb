@@ -55,7 +55,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	public DynamoDBBaseRepository(DynamoDB dynamoDB,
 			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
-			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass) {
+			EntitySchemaSupport entitySchemaSupport, Class<T> entityClass) {
 		this(dynamoDB, entityToItemMapper, itemToEntityMapper,
 				entitySchemaSupport, entityClass,
 				BATCH_EXECUTOR_DEFAULT_CORE_THREADS,
@@ -65,7 +65,7 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 	public DynamoDBBaseRepository(DynamoDB dynamoDB,
 			EntityToItemMapper entityToItemMapper,
 			ItemToEntityMapper<T> itemToEntityMapper,
-			EntitySchemaSupport entitySchemaSupport, Class<?> entityClass,
+			EntitySchemaSupport entitySchemaSupport, Class<T> entityClass,
 			int batchCoreThreadCount, int batchMaxThreadCount) {
 		super(dynamoDB, entitySchemaSupport, entityClass);
 		this.entityToItemMapper = entityToItemMapper;
@@ -371,4 +371,10 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 		return primaryKey;
 	}
 
+	@Override
+	public Class<T> getEntityClass() {
+		// TODO Auto-generated method stub
+		return super.getEntityClass();
+	}
+	
 }
