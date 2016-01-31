@@ -6,35 +6,35 @@ import javax.persistence.Id;
 
 @Entity
 public class SampleEntity {
-	private String someRandomField;
-	@Id
-	private String id;
+    private String someRandomField;
+    @Id
+    private String id;
 
-	@Embedded
-	private SampleEmbeddable embedded;
+    @Embedded
+    private SampleEmbeddable embedded;
 
-	public String getSomeRandomField() {
-		return someRandomField;
-	}
+    public String getSomeRandomField() {
+	return someRandomField;
+    }
 
-	public void setSomeRandomField(String someRandomField) {
-		this.someRandomField = someRandomField;
-	}
+    public void setSomeRandomField(String someRandomField) {
+	this.someRandomField = someRandomField;
+    }
 
-	public SampleEmbeddable getEmbedded() {
-		return embedded;
-	}
+    public SampleEmbeddable getEmbedded() {
+	return embedded;
+    }
 
-	public void setEmbedded(SampleEmbeddable embedded) {
-		this.embedded = embedded;
-	}
+    public void setEmbedded(SampleEmbeddable embedded) {
+	this.embedded = embedded;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+	return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+	this.id = id;
+    }
 
 }

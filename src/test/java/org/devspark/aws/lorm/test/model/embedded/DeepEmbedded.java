@@ -4,14 +4,14 @@ import javax.persistence.Embeddable;
 
 @Embeddable
 public class DeepEmbedded {
-	private String embeddedField;
+    private String embeddedField;
 
-	public String getEmbeddedField() {
-		return embeddedField;
-	}
+    public String getEmbeddedField() {
+	return embeddedField;
+    }
 
-	public void setEmbeddedField(String embeddedField) {
-		this.embeddedField = embeddedField;
-	}
+    public void setEmbeddedField(String embeddedField) {
+	this.embeddedField = embeddedField;
+    }
 
 }

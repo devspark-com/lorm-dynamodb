@@ -13,51 +13,62 @@ import org.devspark.aws.lorm.test.model.Merchant;
 
 @Entity
 public class Expense extends BaseEntity {
-	
-	@NotNull
-	@ManyToOne
-	private Merchant merchant;
-	
-	@NotNull
-	private BigDecimal amount;
-	
-	@NotNull
-	private Date date;
 
-	@NotNull
-	@Size(min=8, max=128)
-	private String description;
+    @NotNull
+    @ManyToOne
+    private Merchant merchant;
 
-	public Merchant getMerchant() {
-		return merchant;
-	}
+    @NotNull
+    private BigDecimal amount;
 
-	public void setMerchant(Merchant merchant) {
-		this.merchant = merchant;
-	}
+    @NotNull
+    private Date date;
 
-	public BigDecimal getAmount() {
-		return amount;
-	}
+    @NotNull
+    @Size(min = 8, max = 128)
+    private String description;
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
+    @NotNull
+    private ExpenseType expenseType;
 
-	public Date getDate() {
-		return date;
-	}
+    public Merchant getMerchant() {
+	return merchant;
+    }
 
-	public void setDate(Date date) {
-		this.date = date;
-	}
+    public void setMerchant(Merchant merchant) {
+	this.merchant = merchant;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public BigDecimal getAmount() {
+	return amount;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setAmount(BigDecimal amount) {
+	this.amount = amount;
+    }
+
+    public Date getDate() {
+	return date;
+    }
+
+    public void setDate(Date date) {
+	this.date = date;
+    }
+
+    public String getDescription() {
+	return description;
+    }
+
+    public void setDescription(String description) {
+	this.description = description;
+    }
+
+    public ExpenseType getExpenseType() {
+	return expenseType;
+    }
+
+    public void setExpenseType(ExpenseType expenseType) {
+	this.expenseType = expenseType;
+    }
 
 }

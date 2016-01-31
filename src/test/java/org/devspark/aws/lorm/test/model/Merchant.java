@@ -9,16 +9,16 @@ import org.devspark.aws.lorm.test.model.BaseEntity;
 @Entity
 public class Merchant extends BaseEntity {
 
-	@NotNull
-	@Size(min=8, max=32)
-	private String name;
+    @NotNull
+    @Size(min = 8, max = 32)
+    private String name;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+	return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+	this.name = name;
+    }
 
 }

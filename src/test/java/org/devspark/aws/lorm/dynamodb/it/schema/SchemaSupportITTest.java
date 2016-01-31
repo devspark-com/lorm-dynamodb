@@ -24,81 +24,77 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
 
 public class SchemaSupportITTest extends BaseIntegrationTest {
 
-	@Before
-	public void setup() {
-		super.setup();
-		
-		addToEntityManager(Merchant.class);
-		addToEntityManager(Expense.class);
-	}
+    @Before
+    public void setup() {
+	super.setup();
 
-	@Test
-	public void testValidateSchema() {
-		EntityToItemMapperImpl<Expense> mapper = new EntityToItemMapperImpl<Expense>(
-				Expense.class);
+	addToEntityManager(Merchant.class);
+	addToEntityManager(Expense.class);
+    }
 
-		List<AttributeDefinition> attrDefs = new ArrayList<AttributeDefinition>();
-		attrDefs.add(new AttributeDefinition("id", ScalarAttributeType.S));
+    @Test
+    public void testValidateSchema() {
+	EntityToItemMapperImpl<Expense> mapper = new EntityToItemMapperImpl<Expense>(Expense.class);
 
-		List<KeySchemaElement> keys = new ArrayList<KeySchemaElement>();
-		keys.add(new KeySchemaElement("id", KeyType.HASH));
+	List<AttributeDefinition> attrDefs = new ArrayList<AttributeDefinition>();
+	attrDefs.add(new AttributeDefinition("id", ScalarAttributeType.S));
 
-		ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput();
-		provisionedThroughput.setReadCapacityUnits(1L);
-		provisionedThroughput.setWriteCapacityUnits(1L);
+	List<KeySchemaElement> keys = new ArrayList<KeySchemaElement>();
+	keys.add(new KeySchemaElement("id", KeyType.HASH));
 
-		// create util for table creation
-		CreateTableRequest createTableReq = new CreateTableRequest()
-				.withTableName("expense").withKeySchema(keys);
-		createTableReq.setAttributeDefinitions(attrDefs);
-		createTableReq.setProvisionedThroughput(provisionedThroughput);
+	ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput();
+	provisionedThroughput.setReadCapacityUnits(1L);
+	provisionedThroughput.setWriteCapacityUnits(1L);
 
-		try {
-			dynamoDB.deleteTable("expense");
-		} catch (Exception ex) {
+	// create util for table creation
+	CreateTableRequest createTableReq = new CreateTableRequest().withTableName("expense")
+		.withKeySchema(keys);
+	createTableReq.setAttributeDefinitions(attrDefs);
+	createTableReq.setProvisionedThroughput(provisionedThroughput);
 
-		}
-
-		dynamoDB.createTable(createTableReq);
-
-		// positive case
-		ItemToEntityMapper<Expense> itemToEntityMapper = new ItemToEntityMapperImpl<Expense>(
-				Expense.class, entityManager);
-
-		DynamoDBBaseRepository<Expense> expenseRepository = new DynamoDBBaseRepository<Expense>(
-				new DynamoDB(dynamoDB), mapper, itemToEntityMapper, mapper,
-				Expense.class);
-
-		List<SchemaValidationError> errors = new ArrayList<SchemaValidationError>();
-		Assert.assertTrue(expenseRepository.isValid(errors));
+	try {
+	    dynamoDB.deleteTable("expense");
+	} catch (Exception ex) {
 
 	}
 
-	@Test
-	public void validateSchemaNegativeCase() {
-		try {
-			dynamoDB.deleteTable("merchant");
-		} catch (Exception ex) {
+	dynamoDB.createTable(createTableReq);
 
-		}
+	// positive case
+	ItemToEntityMapper<Expense> itemToEntityMapper = new ItemToEntityMapperImpl<Expense>(
+		Expense.class, entityManager);
 
-		// negative case
-		EntityToItemMapperImpl<Merchant> merchantMapper = new EntityToItemMapperImpl<Merchant>(
-				Merchant.class);
-		ItemToEntityMapper<Merchant> merchantItemToEntityMapper = new ItemToEntityMapperImpl<Merchant>(
-				Merchant.class, entityManager);
+	DynamoDBBaseRepository<Expense> expenseRepository = new DynamoDBBaseRepository<Expense>(
+		new DynamoDB(dynamoDB), mapper, itemToEntityMapper, mapper, Expense.class);
 
-		DynamoDBBaseRepository<Merchant> merchantRepository = new DynamoDBBaseRepository<Merchant>(
-				new DynamoDB(dynamoDB), merchantMapper,
-				merchantItemToEntityMapper, merchantMapper, Merchant.class);
-		List<SchemaValidationError> merchantSchemaValidationErrors = new ArrayList<SchemaValidationError>();
-		Assert.assertFalse(merchantRepository
-				.isValid(merchantSchemaValidationErrors));
-		Assert.assertTrue(merchantRepository.syncToSchema(false, true, false));
-		merchantSchemaValidationErrors.clear();
-		Assert.assertTrue(merchantRepository
-				.isValid(merchantSchemaValidationErrors));
+	List<SchemaValidationError> errors = new ArrayList<SchemaValidationError>();
+	Assert.assertTrue(expenseRepository.isValid(errors));
+
+    }
+
+    @Test
+    public void validateSchemaNegativeCase() {
+	try {
+	    dynamoDB.deleteTable("merchant");
+	} catch (Exception ex) {
 
 	}
+
+	// negative case
+	EntityToItemMapperImpl<Merchant> merchantMapper = new EntityToItemMapperImpl<Merchant>(
+		Merchant.class);
+	ItemToEntityMapper<Merchant> merchantItemToEntityMapper = new ItemToEntityMapperImpl<Merchant>(
+		Merchant.class, entityManager);
+
+	DynamoDBBaseRepository<Merchant> merchantRepository = new DynamoDBBaseRepository<Merchant>(
+		new DynamoDB(dynamoDB), merchantMapper, merchantItemToEntityMapper, merchantMapper,
+		Merchant.class);
+	List<SchemaValidationError> merchantSchemaValidationErrors = new ArrayList<SchemaValidationError>();
+	Assert.assertFalse(merchantRepository.isValid(merchantSchemaValidationErrors));
+	Assert.assertTrue(merchantRepository.syncToSchema(false, true, false));
+	merchantSchemaValidationErrors.clear();
+	Assert.assertTrue(merchantRepository.isValid(merchantSchemaValidationErrors));
+
+    }
 
 }
