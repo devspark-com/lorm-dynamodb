@@ -58,7 +58,23 @@
 		<snapshotRepository>
 			<id>aws-snapshot</id>
 			<name>AWS Snapshot Repository</name>
-			<url>s3://maven-release-repositories/snapshot</url>
+			<url>s3://maven-snapshot-repositories/snapshot</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<repositories>
+		<repository>
+			<id>s3-snapshots</id>
+			<url>  
+    https://s3-us-west-2.amazonaws.com/maven-snapshot-repositories/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>s3-releases</id>
+			<url>  
+    https://s3-us-west-2.amazonaws.com/maven-release-repositories/release</url>
+		</repository>
+	</repositories>
 </project>
