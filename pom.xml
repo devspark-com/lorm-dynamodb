@@ -1,14 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jstorni</groupId>
+	<groupId>org.devspark</groupId>
 	<artifactId>lorm-dynamodb</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>DynamoDB adapter for LORM</name>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.jstorni</groupId>
+			<groupId>org.devspark</groupId>
 			<artifactId>lorm</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -53,12 +53,12 @@
 		<repository>
 			<id>aws-release</id>
 			<name>AWS Release Repository</name>
-			<url>s3://jstorni-maven-repository/release</url>
+			<url>s3://maven-release-repositories/release</url>
 		</repository>
 		<snapshotRepository>
 			<id>aws-snapshot</id>
 			<name>AWS Snapshot Repository</name>
-			<url>s3://jstorni-maven-repository/snapshot</url>
+			<url>s3://maven-release-repositories/snapshot</url>
 		</snapshotRepository>
 	</distributionManagement>
 </project>
