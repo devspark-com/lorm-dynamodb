@@ -38,8 +38,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
     private final Class<T> entityClass;
     private final EntitySchemaSupport entitySchemaSupport;
 
-    public DynamoDBSchemaSupport(DynamoDB dynamoDB, EntitySchemaSupport entitySchemaSupport,
-	    Class<T> entityClass) {
+    public DynamoDBSchemaSupport(DynamoDB dynamoDB,
+	    EntitySchemaSupport entitySchemaSupport, Class<T> entityClass) {
 	idHandler = new EntityIdHandler(entityClass);
 	this.dynamoDB = dynamoDB;
 	this.entitySchemaSupport = entitySchemaSupport;
@@ -57,10 +57,12 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	    throw new DataException("Not an entity: " + entityClass.getName());
 	}
 
-	String tableName = entityAnnotation.name() != null && !entityAnnotation.name().isEmpty()
-		? entityAnnotation.name()
-		: entityClass.getName().substring(entityClass.getName().lastIndexOf('.') + 1)
-			.toLowerCase();
+	String tableName = entityAnnotation.name() != null
+		&& !entityAnnotation.name().isEmpty()
+			? entityAnnotation.name()
+			: entityClass.getName()
+				.substring(entityClass.getName().lastIndexOf('.') + 1)
+				.toLowerCase();
 
 	return dynamoDB.getTable(tableName);
     }
@@ -84,8 +86,9 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	    try {
 		getTable().describe();
 	    } catch (ResourceNotFoundException ex) {
-		errors.add(SchemaValidationError.buildTableError(getTable().getTableName(),
-			"Table not found: " + getTable().getTableName()));
+		errors.add(
+			SchemaValidationError.buildTableError(getTable().getTableName(),
+				"Table not found: " + getTable().getTableName()));
 		return false;
 	    }
 	}
@@ -119,11 +122,12 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	List<com.amazonaws.services.dynamodbv2.model.AttributeDefinition> sourceAttrs = tableDesc
 		.getAttributeDefinitions();
 	for (com.amazonaws.services.dynamodbv2.model.AttributeDefinition attributeDefinition : sourceAttrs) {
-	    AttributeType attrType = getAttributeType(attributeDefinition.getAttributeType());
+	    AttributeType attrType = getAttributeType(
+		    attributeDefinition.getAttributeType());
 
 	    // TODO get constraints
-	    attributes.add(new AttributeDefinition(attributeDefinition.getAttributeName(), attrType,
-		    null));
+	    attributes.add(new AttributeDefinition(attributeDefinition.getAttributeName(),
+		    attrType, null));
 	}
 
 	return new EntitySchema(tableDesc.getTableName(), attributes);
@@ -165,8 +169,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
     }
 
     @Override
-    public boolean syncToSchema(boolean deleteMissingFields, boolean createTableIfNotExists,
-	    boolean createReferences) {
+    public boolean syncToSchema(boolean deleteMissingFields,
+	    boolean createTableIfNotExists, boolean createReferences) {
 
 	boolean isNewTable = false;
 
@@ -176,7 +180,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 	    if (createTableIfNotExists) {
 		isNewTable = true;
 	    } else {
-		throw new DataValidationException("Table not found: " + getTable().getTableName());
+		throw new DataValidationException(
+			"Table not found: " + getTable().getTableName());
 	    }
 	}
 
