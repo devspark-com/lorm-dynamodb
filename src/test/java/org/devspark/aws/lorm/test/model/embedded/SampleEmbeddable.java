@@ -11,18 +11,18 @@ public class SampleEmbeddable {
     private DeepEmbedded deepEmbedded;
 
     public String getSomeField() {
-	return someField;
+        return someField;
     }
 
     public void setSomeField(String someField) {
-	this.someField = someField;
+        this.someField = someField;
     }
 
     public DeepEmbedded getDeepEmbedded() {
-	return deepEmbedded;
+        return deepEmbedded;
     }
 
     public void setDeepEmbedded(DeepEmbedded deepEmbedded) {
-	this.deepEmbedded = deepEmbedded;
+        this.deepEmbedded = deepEmbedded;
     }
 }

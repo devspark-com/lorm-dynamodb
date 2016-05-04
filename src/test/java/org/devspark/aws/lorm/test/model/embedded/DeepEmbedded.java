@@ -7,11 +7,11 @@ public class DeepEmbedded {
     private String embeddedField;
 
     public String getEmbeddedField() {
-	return embeddedField;
+        return embeddedField;
     }
 
     public void setEmbeddedField(String embeddedField) {
-	this.embeddedField = embeddedField;
+        this.embeddedField = embeddedField;
     }
 
 }

@@ -15,182 +15,193 @@ import org.junit.Test;
 
 public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
-	@Before
-	public void setup() {
-		super.setup();
+    @Before
+    public void setup() {
+        super.setup();
+        
+        addToEntityManager(Merchant.class);
+        addToEntityManager(Expense.class);
+        addToEntityManager(SampleEntity.class);
+        
+        setupSchemaForEntity(Merchant.class);
+        setupSchemaForEntity(Expense.class);
+        setupSchemaForEntity(SampleEntity.class);
 
-		addToEntityManager(Merchant.class);
-		addToEntityManager(Expense.class);
-		addToEntityManager(SampleEntity.class);
+        Repository<Merchant> merchantRepository = entityManager
+                .getRepository(Merchant.class);
+        List<String> existingMerchantIds = new ArrayList<String>();
+        List<Merchant> existingMerchants = merchantRepository.findAll();
+        for (Merchant merchant : existingMerchants) {
+            existingMerchantIds.add(merchant.getId());
+        }
+        merchantRepository.deleteById(existingMerchantIds);
 
-		setupSchemaForEntity(Merchant.class);
-		setupSchemaForEntity(Expense.class);
-		setupSchemaForEntity(SampleEntity.class);
+        // remove all expenses
+        Repository<Expense> expenseRepository = entityManager
+                .getRepository(Expense.class);
 
-		// remove all merchants
+        List<String> existingExpenseIds = new ArrayList<String>();
+        List<Expense> existingExpenses = expenseRepository.findAll();
+        for (Expense expense : existingExpenses) {
+            existingExpenseIds.add(expense.getId());
+        }
+        expenseRepository.deleteById(existingExpenseIds);
 
-		Repository<Merchant> merchantRepository = entityManager
-				.getRepository(Merchant.class);
+    }
 
-		List<String> existingMerchantIds = new ArrayList<String>();
-		List<Merchant> existingMerchants = merchantRepository.findAll();
-		for (Merchant merchant : existingMerchants) {
-			existingMerchantIds.add(merchant.getId());
-		}
-		merchantRepository.deleteById(existingMerchantIds);
+    private Merchant buildMerchant(String name) {
+        Merchant merchant = new Merchant();
+        merchant.setName(name);
 
-		// remove all expenses
-		Repository<Expense> expenseRepository = entityManager
-				.getRepository(Expense.class);
+        return merchant;
+    }
 
-		List<String> existingExpenseIds = new ArrayList<String>();
-		List<Expense> existingExpenses = expenseRepository.findAll();
-		for (Expense expense : existingExpenses) {
-			existingExpenseIds.add(expense.getId());
-		}
-		expenseRepository.deleteById(existingExpenseIds);
+    @Test
+    public void testEmbedded() {
+        SampleEntity sampleEntity = new SampleEntity();
+        sampleEntity.setId("abarajame");
+        sampleEntity.setSomeRandomField("random field");
+        sampleEntity.setEmbedded(buildSampleEmbeddable());
 
-	}
+        Repository<SampleEntity> repository = entityManager
+                .getRepository(SampleEntity.class);
 
-	private Merchant buildMerchant(String name) {
-		Merchant merchant = new Merchant();
-		merchant.setName(name);
+        repository.save(sampleEntity);
 
-		return merchant;
-	}
+        SampleEntity savedSampleEntity = repository.findOne("abarajame");
 
-	@Test
-	public void testEmbedded() {
-		SampleEntity sampleEntity = new SampleEntity();
-		sampleEntity.setId("abarajame");
-		sampleEntity.setSomeRandomField("random field");
-		sampleEntity.setEmbedded(buildSampleEmbeddable());
+        Assert.assertNotNull(savedSampleEntity);
+        Assert.assertNotNull(savedSampleEntity.getEmbedded());
+        Assert.assertNotNull(savedSampleEntity.getEmbedded().getDeepEmbedded());
 
-		Repository<SampleEntity> repository = entityManager
-				.getRepository(SampleEntity.class);
+        Assert.assertEquals("random field", savedSampleEntity.getSomeRandomField());
+        Assert.assertEquals("some embedded field",
+                savedSampleEntity.getEmbedded().getSomeField());
+        Assert.assertEquals("some deep embedded field",
+                savedSampleEntity.getEmbedded().getDeepEmbedded().getEmbeddedField());
+    }
 
-		repository.save(sampleEntity);
+    private SampleEmbeddable buildSampleEmbeddable() {
+        DeepEmbedded deepEmbedded = new DeepEmbedded();
+        deepEmbedded.setEmbeddedField("some deep embedded field");
 
-		SampleEntity savedSampleEntity = repository.findOne("abarajame");
+        SampleEmbeddable sampleEmbeddable = new SampleEmbeddable();
+        sampleEmbeddable.setSomeField("some embedded field");
+        sampleEmbeddable.setDeepEmbedded(deepEmbedded);
 
-		Assert.assertNotNull(savedSampleEntity);
-		Assert.assertNotNull(savedSampleEntity.getEmbedded());
-		Assert.assertNotNull(savedSampleEntity.getEmbedded().getDeepEmbedded());
+        return sampleEmbeddable;
+    }
 
-		Assert.assertEquals("random field",
-				savedSampleEntity.getSomeRandomField());
-		Assert.assertEquals("some embedded field", savedSampleEntity
-				.getEmbedded().getSomeField());
-		Assert.assertEquals("some deep embedded field", savedSampleEntity
-				.getEmbedded().getDeepEmbedded().getEmbeddedField());
-	}
+    @Test
+    public void testSingle() {
+        Repository<Merchant> repository = entityManager.getRepository(Merchant.class);
 
-	private SampleEmbeddable buildSampleEmbeddable() {
-		DeepEmbedded deepEmbedded = new DeepEmbedded();
-		deepEmbedded.setEmbeddedField("some deep embedded field");
+        // create one
+        Merchant merchant = buildMerchant("new merchant");
 
-		SampleEmbeddable sampleEmbeddable = new SampleEmbeddable();
-		sampleEmbeddable.setSomeField("some embedded field");
-		sampleEmbeddable.setDeepEmbedded(deepEmbedded);
+        Merchant savedMerchant = repository.save(merchant);
 
-		return sampleEmbeddable;
-	}
+        Assert.assertTrue(merchant == savedMerchant); // same reference
+        Assert.assertNotNull(merchant.getId());
+        Assert.assertEquals("new merchant", merchant.getName());
 
-	@Test
-	public void testSingle() {
-		Repository<Merchant> repository = entityManager
-				.getRepository(Merchant.class);
+        // find by id
+        Merchant foundMerchant = repository.findOne(merchant.getId());
+        Assert.assertNotNull(foundMerchant);
+        Assert.assertEquals(merchant.getId(), foundMerchant.getId());
+        Assert.assertEquals("new merchant", foundMerchant.getName());
 
-		// create one
-		Merchant merchant = buildMerchant("new merchant");
+        // create another for search
+        Merchant anotherMerchant = buildMerchant("new merchant");
+        repository.save(anotherMerchant);
+        
+        // find by query
+        List<Merchant> query = repository.query("name", "new merchant");
+        Assert.assertNotNull(query);
+        Assert.assertEquals(2, query.size());
+        Merchant queryMerchant = query.get(0);
+        Assert.assertNotNull(queryMerchant);
+        Assert.assertTrue(queryMerchant.getId().equals(merchant.getId()) 
+                || queryMerchant.getId().equals(anotherMerchant.getId()));
+        Assert.assertEquals("new merchant", queryMerchant.getName());
+        
+        // update
+        foundMerchant.setName("updated name");
+        repository.save(foundMerchant);
+        Merchant updatedMerchant = repository.findOne(merchant.getId());
+        Assert.assertNotNull(updatedMerchant);
+        Assert.assertEquals(merchant.getId(), updatedMerchant.getId());
+        Assert.assertEquals("updated name", updatedMerchant.getName());
 
-		Merchant savedMerchant = repository.save(merchant);
+        // delete
+        repository.deleteById(merchant.getId());
+        repository.deleteById(anotherMerchant.getId());
+        
+        Merchant deletedMerchant = repository.findOne(merchant.getId());
+        Assert.assertNull(deletedMerchant);
+        
+        Merchant anotherDeletedMerchant = repository.findOne(anotherMerchant.getId());
+        Assert.assertNull(anotherDeletedMerchant);
+    }
 
-		Assert.assertTrue(merchant == savedMerchant); // same reference
-		Assert.assertNotNull(merchant.getId());
-		Assert.assertEquals("new merchant", merchant.getName());
+    @Test
+    public void testBatch() {
+        Repository<Merchant> repository = entityManager.getRepository(Merchant.class);
 
-		// find by id
-		Merchant foundMerchant = repository.findOne(merchant.getId());
-		Assert.assertNotNull(foundMerchant);
-		Assert.assertEquals(merchant.getId(), foundMerchant.getId());
-		Assert.assertEquals("new merchant", foundMerchant.getName());
+        // add 100
+        List<Merchant> merchants = new ArrayList<Merchant>();
+        for (int i = 0; i < 100; i++) {
+            Merchant merchant = buildMerchant("sample merchant #" + i);
+            merchants.add(merchant);
+        }
 
-		// update
-		foundMerchant.setName("updated name");
-		repository.save(foundMerchant);
-		Merchant updatedMerchant = repository.findOne(merchant.getId());
-		Assert.assertNotNull(updatedMerchant);
-		Assert.assertEquals(merchant.getId(), updatedMerchant.getId());
-		Assert.assertEquals("updated name", updatedMerchant.getName());
+        repository.save(merchants);
 
-		// delete
-		repository.deleteById(merchant.getId());
-		Merchant deletedMerchant = repository.findOne(merchant.getId());
-		Assert.assertNull(deletedMerchant);
-	}
+        // fetch recently added
+        List<Merchant> savedMerchants = repository.findAll();
 
-	@Test
-	public void testBatch() {
-		Repository<Merchant> repository = entityManager
-				.getRepository(Merchant.class);
+        Assert.assertNotNull(savedMerchants);
+        Assert.assertEquals(merchants.size(), savedMerchants.size());
 
-		// add 100
-		List<Merchant> merchants = new ArrayList<Merchant>();
-		for (int i = 0; i < 100; i++) {
-			Merchant merchant = buildMerchant("sample merchant #" + i);
-			merchants.add(merchant);
-		}
+        for (Merchant merchant : merchants) {
+            boolean found = false;
+            for (Merchant savedMerchant : savedMerchants) {
+                if (merchant.getId().equals(savedMerchant.getId())) {
+                    Assert.assertEquals(merchant.getName(), savedMerchant.getName());
+                    found = true;
+                    break;
+                }
+            }
 
-		repository.save(merchants);
+            Assert.assertTrue("Merchant not found", found);
+        }
 
-		// fetch recently added
-		List<Merchant> savedMerchants = repository.findAll();
+        // update all
+        for (Merchant merchant : merchants) {
+            merchant.setName("updated name");
+        }
 
-		Assert.assertNotNull(savedMerchants);
-		Assert.assertEquals(merchants.size(), savedMerchants.size());
+        repository.save(merchants);
 
-		for (Merchant merchant : merchants) {
-			boolean found = false;
-			for (Merchant savedMerchant : savedMerchants) {
-				if (merchant.getId().equals(savedMerchant.getId())) {
-					Assert.assertEquals(merchant.getName(),
-							savedMerchant.getName());
-					found = true;
-					break;
-				}
-			}
+        // check batch update
+        List<Merchant> updatedMerchants = repository.findAll();
 
-			Assert.assertTrue("Merchant not found", found);
-		}
+        Assert.assertNotNull(updatedMerchants);
+        Assert.assertEquals(merchants.size(), updatedMerchants.size());
 
-		// update all
-		for (Merchant merchant : merchants) {
-			merchant.setName("updated name");
-		}
+        for (Merchant merchant : merchants) {
+            boolean found = false;
+            for (Merchant updatedMerchant : updatedMerchants) {
+                if (merchant.getId().equals(updatedMerchant.getId())) {
+                    Assert.assertEquals("updated name", updatedMerchant.getName());
+                    found = true;
+                    break;
+                }
+            }
 
-		repository.save(merchants);
+            Assert.assertTrue("Merchant not found", found);
+        }
 
-		// check batch update
-		List<Merchant> updatedMerchants = repository.findAll();
-
-		Assert.assertNotNull(updatedMerchants);
-		Assert.assertEquals(merchants.size(), updatedMerchants.size());
-
-		for (Merchant merchant : merchants) {
-			boolean found = false;
-			for (Merchant updatedMerchant : updatedMerchants) {
-				if (merchant.getId().equals(updatedMerchant.getId())) {
-					Assert.assertEquals("updated name",
-							updatedMerchant.getName());
-					found = true;
-					break;
-				}
-			}
-
-			Assert.assertTrue("Merchant not found", found);
-		}
-
-	}
+    }
 
 }

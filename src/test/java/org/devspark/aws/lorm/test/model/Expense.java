@@ -4,14 +4,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.devspark.aws.lorm.test.model.BaseEntity;
-import org.devspark.aws.lorm.test.model.Merchant;
-
 @Entity
+@Table(indexes= {@Index(name="expense.merchant", columnList="merchant.id", unique=false)})
 public class Expense extends BaseEntity {
 
     @NotNull
@@ -32,43 +32,43 @@ public class Expense extends BaseEntity {
     private ExpenseType expenseType;
 
     public Merchant getMerchant() {
-	return merchant;
+        return merchant;
     }
 
     public void setMerchant(Merchant merchant) {
-	this.merchant = merchant;
+        this.merchant = merchant;
     }
 
     public BigDecimal getAmount() {
-	return amount;
+        return amount;
     }
 
     public void setAmount(BigDecimal amount) {
-	this.amount = amount;
+        this.amount = amount;
     }
 
     public Date getDate() {
-	return date;
+        return date;
     }
 
     public void setDate(Date date) {
-	this.date = date;
+        this.date = date;
     }
 
     public String getDescription() {
-	return description;
+        return description;
     }
 
     public void setDescription(String description) {
-	this.description = description;
+        this.description = description;
     }
 
     public ExpenseType getExpenseType() {
-	return expenseType;
+        return expenseType;
     }
 
     public void setExpenseType(ExpenseType expenseType) {
-	this.expenseType = expenseType;
+        this.expenseType = expenseType;
     }
 
 }

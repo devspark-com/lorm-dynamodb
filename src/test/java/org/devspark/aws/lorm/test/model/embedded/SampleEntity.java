@@ -14,27 +14,27 @@ public class SampleEntity {
     private SampleEmbeddable embedded;
 
     public String getSomeRandomField() {
-	return someRandomField;
+        return someRandomField;
     }
 
     public void setSomeRandomField(String someRandomField) {
-	this.someRandomField = someRandomField;
+        this.someRandomField = someRandomField;
     }
 
     public SampleEmbeddable getEmbedded() {
-	return embedded;
+        return embedded;
     }
 
     public void setEmbedded(SampleEmbeddable embedded) {
-	this.embedded = embedded;
+        this.embedded = embedded;
     }
 
     public String getId() {
-	return id;
+        return id;
     }
 
     public void setId(String id) {
-	this.id = id;
+        this.id = id;
     }
 
 }
