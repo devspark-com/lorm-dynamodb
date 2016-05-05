@@ -47,7 +47,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
     private final Class<T> entityClass;
     private final EntitySchemaSupport entitySchemaSupport;
     private final Set<Index> entityIndexes;
-    private final long DELETE_TABLE_TIMEOUT = 30000;
+    private final long DELETE_TABLE_TIMEOUT = 60000;
 
     public DynamoDBSchemaSupport(DynamoDB dynamoDB,
             EntitySchemaSupport entitySchemaSupport, Class<T> entityClass) {
@@ -248,8 +248,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
                 GlobalSecondaryIndex tableIndex = new GlobalSecondaryIndex()
                         .withIndexName(descriptorIndex.getName())
                         .withProvisionedThroughput(new ProvisionedThroughput()
-                                .withReadCapacityUnits((long) 10)
-                                .withWriteCapacityUnits((long) 1))
+                                .withReadCapacityUnits(100L).withWriteCapacityUnits(100L))
                         .withProjection(
                                 new Projection().withProjectionType(ProjectionType.ALL));
 
@@ -290,8 +289,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
 
             // TODO get this from configuration
             ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput();
-            provisionedThroughput.setReadCapacityUnits(1L);
-            provisionedThroughput.setWriteCapacityUnits(1L);
+            provisionedThroughput.setReadCapacityUnits(100L);
+            provisionedThroughput.setWriteCapacityUnits(100L);
 
             CreateTableRequest createTableReq = new CreateTableRequest()
                     .withTableName(getTable().getTableName()).withKeySchema(keys);
@@ -341,7 +340,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
             getTable().delete();
             deleted = true;
         } catch (ResourceNotFoundException ex) {
-            LOG.info("Resource not found " + getTable().getTableName() + ". Assuming deleted");
+            LOG.info("Resource not found " + getTable().getTableName()
+                    + ". Assuming deleted");
             deleted = true;
         } catch (ResourceInUseException ex) {
             LOG.warn("Could not delete [" + tableName
@@ -352,7 +352,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
             } catch (InterruptedException e) {
 
             }
-            
+
             return deleteTable(tableName, maxWait - 5000);
 
         }
@@ -361,7 +361,8 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
         try {
             tableDesc = getTable().describe();
         } catch (ResourceNotFoundException ex) {
-            LOG.info("Table description not found " + getTable().getTableName() + ". Assuming deleted");
+            LOG.info("Table description not found " + getTable().getTableName()
+                    + ". Assuming deleted");
             deleted = true;
         }
 
@@ -373,7 +374,7 @@ public class DynamoDBSchemaSupport<T> implements SchemaSupport<T> {
             } catch (InterruptedException e) {
 
             }
-            
+
             return deleteTable(tableName, maxWait - 5000);
         }
 
