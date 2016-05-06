@@ -99,6 +99,13 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
         Map<String, Object> itemMap = item.asMap();
         for (String attrName : itemMap.keySet()) {
+            if (!item.hasAttribute(attrName) 
+                    || item.get(attrName) == null) {
+                log.warn("Expected attribute " + attrName + " of table " + getTable()
+                        + " not found");
+                continue;
+            }
+
             Object itemValue = item.get(attrName);
             attributes.put(new AttributeDefinition(attrName,
                     getAttributeType(itemValue.getClass()), null), itemValue);
@@ -135,6 +142,12 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
 
     @Override
     public List<T> query(String attributeName, String value) {
+        return query(attributeName, value, true, 100);
+    }
+    
+    @Override
+    public List<T> query(String attributeName, String value, 
+            boolean ascendingOrder, int maxResultSize) {
         Set<Index> indexes = getEntityIndexes();
         Index currentIndex = null;
         for (Index index : indexes) {
@@ -149,25 +162,27 @@ public class DynamoDBBaseRepository<T> extends DynamoDBSchemaSupport<T>
             throw new DataValidationException(
                     "No index found in JPA annotations " + getTable().getTableName()
                             + " with support of a search by [" + attributeName + "]");
-        }        
-        
-        com.amazonaws.services.dynamodbv2.document.Index tableIndex = 
-                getTable().getIndex(currentIndex.getName());
-        
+        }
+
+        com.amazonaws.services.dynamodbv2.document.Index tableIndex = getTable()
+                .getIndex(currentIndex.getName());
+
         if (tableIndex == null) {
             throw new DataValidationException(
                     "No index found in table " + getTable().getTableName()
-                            + " with support of a search by [" + attributeName + "]");            
+                            + " with support of a search by [" + attributeName + "]");
         }
-        
-        Map<String, String> nameMap = new HashMap<>();
-        nameMap.put("#" + attributeName, attributeName);
-        QuerySpec spec = new QuerySpec()
-                .withKeyConditionExpression("#" + attributeName + " = :attrValue")
-                .withNameMap(nameMap)
-                .withValueMap(new ValueMap().withString(":attrValue", value));
 
-        // TODO query index
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("#" + attributeName.replace('.', '_'), attributeName);
+        QuerySpec spec = new QuerySpec()
+                .withKeyConditionExpression(
+                        "#" + attributeName.replace('.', '_') + " = :attrValue")
+                .withNameMap(nameMap)
+                .withValueMap(new ValueMap().withString(":attrValue", value))
+                .withScanIndexForward(ascendingOrder)
+                .withMaxResultSize(maxResultSize);
+
         ItemCollection<QueryOutcome> queryItems = tableIndex.query(spec);
         List<T> items = new ArrayList<T>();
 

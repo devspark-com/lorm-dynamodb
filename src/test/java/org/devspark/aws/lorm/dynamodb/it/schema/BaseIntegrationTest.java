@@ -127,7 +127,7 @@ public class BaseIntegrationTest {
     protected <T> void setupSchemaForEntity(Class<T> entityClass) {
         SchemaSupport<T> repository = (SchemaSupport<T>) entityManager
                 .getRepository(entityClass);
-        Assert.assertTrue("delete table", repository.deleteTable());
+     //   Assert.assertTrue("delete table", repository.deleteTable());
         repository.syncToSchema(true, true, true);
     }
 }

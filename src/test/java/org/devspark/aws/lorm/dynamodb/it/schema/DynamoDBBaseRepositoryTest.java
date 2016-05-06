@@ -1,10 +1,13 @@
 package org.devspark.aws.lorm.dynamodb.it.schema;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.devspark.aws.lorm.Repository;
 import org.devspark.aws.lorm.test.model.Expense;
+import org.devspark.aws.lorm.test.model.ExpenseType;
 import org.devspark.aws.lorm.test.model.Merchant;
 import org.devspark.aws.lorm.test.model.embedded.DeepEmbedded;
 import org.devspark.aws.lorm.test.model.embedded.SampleEmbeddable;
@@ -18,11 +21,11 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
     @Before
     public void setup() {
         super.setup();
-        
+
         addToEntityManager(Merchant.class);
         addToEntityManager(Expense.class);
         addToEntityManager(SampleEntity.class);
-        
+
         setupSchemaForEntity(Merchant.class);
         setupSchemaForEntity(Expense.class);
         setupSchemaForEntity(SampleEntity.class);
@@ -114,17 +117,17 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
         // create another for search
         Merchant anotherMerchant = buildMerchant("new merchant");
         repository.save(anotherMerchant);
-        
+
         // find by query
         List<Merchant> query = repository.query("name", "new merchant");
         Assert.assertNotNull(query);
         Assert.assertEquals(2, query.size());
         Merchant queryMerchant = query.get(0);
         Assert.assertNotNull(queryMerchant);
-        Assert.assertTrue(queryMerchant.getId().equals(merchant.getId()) 
+        Assert.assertTrue(queryMerchant.getId().equals(merchant.getId())
                 || queryMerchant.getId().equals(anotherMerchant.getId()));
         Assert.assertEquals("new merchant", queryMerchant.getName());
-        
+
         // update
         foundMerchant.setName("updated name");
         repository.save(foundMerchant);
@@ -136,10 +139,10 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
         // delete
         repository.deleteById(merchant.getId());
         repository.deleteById(anotherMerchant.getId());
-        
+
         Merchant deletedMerchant = repository.findOne(merchant.getId());
         Assert.assertNull(deletedMerchant);
-        
+
         Merchant anotherDeletedMerchant = repository.findOne(anotherMerchant.getId());
         Assert.assertNull(anotherDeletedMerchant);
     }
@@ -204,4 +207,26 @@ public class DynamoDBBaseRepositoryTest extends BaseIntegrationTest {
 
     }
 
+    @Test
+    public void testQueryManyToMany() {
+        Repository<Merchant> merchantRepository = entityManager
+                .getRepository(Merchant.class);
+        Merchant merchant = buildMerchant("new merchant");
+        merchantRepository.save(merchant);
+
+        
+        Repository<Expense> expenseRepository = entityManager
+                .getRepository(Expense.class);
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal(0));
+        expense.setDate(new Date());
+        expense.setDescription("expense description");
+        expense.setExpenseType(ExpenseType.REIMBURSABLE);
+        expense.setMerchant(merchant);
+        
+        expenseRepository.save(expense);
+        
+        expenseRepository.query("merchant.id", merchant.getId());
+    }
 }
